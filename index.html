@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"> 
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -24,7 +24,8 @@
     <script>
       /**
        * 主流程：把 formSubmitUrl 设为收件端点 → 访客提交后发到你邮箱；你再在 Outlook 里约 Zoom/腾讯会议并通过邮件回链（静态页无法在访客浏览器里替你建会）。
-       * 默认使用 FormSubmit AJAX；首次须在 **formSubmitUrl 里的主邮箱** 收信并点击「激活表单」（垃圾箱里常见）。也可用 Formspree。
+       * FormSubmit：首次须在 URL 里的主邮箱收信并点击「激活表单」。
+       * Google Apps Script：把 formSubmitUrl 换成 `https://script.google.com/macros/s/…/exec`（见文件内说明）；与 FormSubmit 互斥，二选一。
        * 可选：calendlyInlineUrl — Calendly 活动页链接（站内用 iframe 嵌入）；embedUrl — 任意可 iframe 嵌入的预订页。
        */
       window.APRIL_BOOKING = {
@@ -37,12 +38,16 @@
         embedUrl: "",
         openInNewTabUrl: "https://calendly.com/april-zhao-wustl/30min",
         /**
-         * 必填（否则为演示模式）。
-         * FormSubmit：默认用下方 163 收「激活表单」邮件更稳；每封仍会 _cc 到校邮。
-         * Formspree：https://formspree.io/f/你的 id（沿用 FormData POST，勿用 /ajax/ 邮箱）。
+         * 必填（否则为演示模式）。当前为 Google Apps Script Web 应用「/exec」地址；在地址栏直接打开若提示 doGet 属正常（表单走 POST）。
+         * 若改回 FormSubmit：用 https://formsubmit.co/ajax/你的邮箱
          */
-        formSubmitUrl: "https://formsubmit.co/ajax/18506367736@163.com",
-        /** FormSubmit：抄送信箱（不参与激活）。留空则不抄送 */
+        formSubmitUrl:
+          "https://script.google.com/macros/s/AKfycbx-51b1R800zRDx9zMZs9bSWEc8VmpfR499aGdcfAunFPa9IYI6JtUaNATfIgxvqeMc/exec",
+        /**
+         * 可选：与 Google Apps Script 约定同一串乱码，写入脚本「项目属性」里，略防机器人乱 POST（可不填）。
+         */
+        googleAppsScriptFormSecret: "",
+        /** FormSubmit / GAS：抄送信箱。留空则不抄送（GAS 端须发信时带 CC） */
         formSubmitCc: "april.zhao@wustl.edu",
         /** 邮件主题（Formspree 的 _subject 等会带上访客填写的日期/会议方式等字段一起发到正文） */
         formEmailSubject: "个人站：预约对谈 - Coffee chat",
@@ -4753,6 +4758,47 @@
                 book.formSubmitCc && String(book.formSubmitCc).trim();
               fd.set("_subject", subj);
               var formsubmitAjax = /^https:\/\/formsubmit\.co\/ajax\//i.test(postUrl);
+              var isGoogleAppsScript = /script\.google\.com\/macros\//i.test(postUrl);
+              if (ccEmail && !formsubmitAjax) {
+                fd.set("_cc", ccEmail);
+              }
+              if (isGoogleAppsScript) {
+                var gasSecret =
+                  book.googleAppsScriptFormSecret && String(book.googleAppsScriptFormSecret).trim();
+                var params = new URLSearchParams();
+                fd.forEach(function (v, k) {
+                  if (k === "_gotcha") return;
+                  params.append(k, String(v));
+                });
+                params.set("_subject", subj);
+                try {
+                  params.set("submitted_from", typeof location !== "undefined" ? location.href : "");
+                } catch (e1) {}
+                if (gasSecret) params.set("form_secret", gasSecret);
+                fetch(postUrl, {
+                  method: "POST",
+                  mode: "no-cors",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: params.toString(),
+                  referrerPolicy: "unsafe-url",
+                })
+                  .then(function () {
+                    setModal(true, "sent");
+                    form.reset();
+                    syncCoffeeFormStrings(getLocale());
+                  })
+                  .catch(function () {
+                    window.alert(
+                      getLocale() === "en"
+                        ? "Could not send just now—please retry or email me directly."
+                        : "发送暂时失败，请稍后重试，或直接发邮件联系。"
+                    );
+                  })
+                  .finally(function () {
+                    if (btn) btn.disabled = false;
+                  });
+                return;
+              }
               var fetchInit = formsubmitAjax
                 ? (function () {
                     var payload = {};
@@ -4774,9 +4820,6 @@
                     };
                   })()
                 : { method: "POST", body: fd, headers: { Accept: "application/json" } };
-              if (ccEmail && !formsubmitAjax) {
-                fd.set("_cc", ccEmail);
-              }
               fetch(postUrl, Object.assign({ referrerPolicy: "unsafe-url" }, fetchInit))
                 .then(function (res) {
                   return res.text().then(function (t) {
