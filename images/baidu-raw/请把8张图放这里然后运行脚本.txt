@@ -1,0 +1,28 @@
+「无法插入」通常指：不是在 Word/网页里点「插入图片」，而是要把文件**放进本机这个文件夹**里。
+
+一、用访达（Finder）把照片放进来
+1. 在 Cursor/VSCode 里右键本文件 →「在访达中显示」或打开：April个人网站 / images / baidu-raw
+2. 把现场图**复制或拖入** baidu-raw 文件夹（例如 图1.jpg…图10.jpg）
+3. 顺序由**自然数**决定：脚本会按 图1、图2、…、图10 排序，不会把「图10」错排到「图2」前面
+
+二、在终端里打包成网站要用的 intern-baidu-1.jpg …
+在本站根目录（April个人网站，与 index.html 同级）执行：
+
+  chmod +x scripts/bundle-intern-baidu-photos.sh
+  ./scripts/bundle-intern-baidu-photos.sh
+
+也可以指定「放照片的任意文件夹」：
+
+  ./scripts/bundle-intern-baidu-photos.sh "/你的路径/放照片的文件夹"
+
+脚本会在 images/ 下生成 intern-baidu-1.jpg、intern-baidu-2.jpg …（张数=你放进源文件夹的图片数）。
+
+三、和网页配置对齐
+- 站内核认为「当前 10 张」时：页首 APRIL_BAIDU_CCF.files 为 intern-baidu-1.jpg … intern-baidu-10.jpg 及对应 alts（已在 index 里配好，一般不必改）
+- 若张数有变：在 files 与 alts 里**同样增删行**即可
+
+四、本地预览
+  ./serve.sh
+浏览器打开 http://127.0.0.1:8080/ 并强刷（Cmd+Shift+R）。不要用 file:// 直接开 html。
+
+（说明：若以前跑脚本报错「找不到文件」，是因为仓库里已补上 scripts/bundle-intern-baidu-photos.sh。）

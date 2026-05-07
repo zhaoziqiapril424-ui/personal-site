@@ -1,0 +1,12 @@
+portrait.png = 首屏个人油画风肖像
+
+about-intro.jpg = 「关于我」左栏单张方图（油画风肖像，建议方图或裁切为方型）
+
+SCENES（一行四张方图，about-5～about-8.jpg）：
+scripts/build_scenes_jpg.py 从即梦 PNG 居中裁方图 900×900。换图改脚本 MAPPING 后运行 .venv/bin/python scripts/build_scenes_jpg.py，index 里 ?v= 加 1 并强刷。
+
+proj-olin-smpgo.png（或 .jpg）= SMP GO 正页。proj-olin-smpgo-back.png = 反页。两图在项目块内同一行并排（窄屏会上下堆叠）。来源可为「SMP GO Welcome Guide / Final Version- front page.png」与「Final Version - back page.png」。
+
+「百度 · 校园品牌部」CCF 活动图：张数不限。在 index.html 页首的 window.APRIL_BAIDU_CCF.files 里按顺序写 images/ 下文件名。若无图、页面破图，在本站根目录执行：.venv/bin/python scripts/generate_baidu_ccf_placeholders.py 可生成 10 张 intern-baidu-*.jpg 浅色占位。有 图1.jpg… 实图时执行 ./scripts/bundle-intern-baidu-photos.sh 会写入 images/ 并覆盖同名文件。需本地 ./serve.sh 后浏览器打开，勿用 file:// 直接开 index。可选 APRIL_BAIDU_CCF.alts。宽屏 5 列自动换行。
+
+本地请在本目录执行 ./serve.sh 再用浏览器打开 http://127.0.0.1:8080/  替换图片后强刷（Cmd+Shift+R）。不要用 file:// 直接打开 index（相对路径和缓存容易出问题）。若 about-intro 无法加载，页面会回退到同目录的 portrait.png。
