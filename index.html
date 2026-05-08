@@ -23,10 +23,9 @@
     />
     <script>
       /**
-       * 主流程：把 formSubmitUrl 设为收件端点 → 访客提交后发到你邮箱；你再在 Outlook 里约 Zoom/腾讯会议并通过邮件回链（静态页无法在访客浏览器里替你建会）。
-       * FormSubmit：首次须在 URL 里的主邮箱收信并点击「激活表单」。
-       * Google Apps Script：把 formSubmitUrl 换成 `https://script.google.com/macros/s/…/exec`（见文件内说明）；与 FormSubmit 互斥，二选一。
-       * 可选：calendlyInlineUrl — Calendly 活动页链接（站内用 iframe 嵌入）；embedUrl — 任意可 iframe 嵌入的预订页。
+       * Coffee 预约：`calendlyInlineUrl`（及可选 `embedUrl`）驱动页内日历；卡片切换不同 Calendly Event。
+       * `openInNewTabUrl`：外链兜底。访客姓名 / 话题建议在 Calendly「预约问题」里收集。
+       * `formSubmitUrl` 等：站内已无预约表单；字段保留仅供日后扩展或脚本参考。
        */
       window.APRIL_BOOKING = {
         /**
@@ -685,22 +684,30 @@
       @keyframes hero-bg-garden-drift {
         0%,
         100% {
-          transform: translateY(-50%) translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg)
-            translate3d(0, 0, 0);
+          transform: translateY(-50%) translateX(var(--hero-garden-shift-x, 0px))
+            translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg) translate3d(0, 0, 0);
         }
         50% {
-          transform: translateY(-50%) translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg)
-            translate3d(0, -8px, 0);
+          transform: translateY(-50%) translateX(var(--hero-garden-shift-x, 0px))
+            translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg) translate3d(0, -8px, 0);
         }
       }
-      /* 放入首屏栅格内分层：压在肖像之下、主内容与侧栏之上，避免 ::after 整块低于 .wrap */
+      /* 首屏栅格内：装饰文字 z-index 最低，肖像与主内容在其之上 */
       .hero-bg-garden {
-        --hero-garden-drift-x: clamp(-13rem, calc((min(1100px, 92vw) - 100vw) / 4 + max(0.75rem, env(safe-area-inset-left, 0px))), -2rem);
+        --hero-garden-shift-x: clamp(-5rem, -8vw, -1.25rem);
+        --hero-garden-drift-x: clamp(
+          -16rem,
+          calc(
+            (min(1100px, 92vw) - 100vw) / 4 + max(0.75rem, env(safe-area-inset-left, 0px)) - min(4vw, 3rem)
+          ),
+          -5rem
+        );
         position: absolute;
-        left: 0;
+        left: clamp(-5.5rem, -7vw, -1rem);
         top: 42%;
-        z-index: 1;
-        transform: translateY(-50%) translateX(var(--hero-garden-drift-x)) rotate(-90deg);
+        z-index: 0;
+        transform: translateY(-50%) translateX(var(--hero-garden-shift-x)) translateX(var(--hero-garden-drift-x))
+          rotate(-90deg);
         transform-origin: center center;
         font-size: clamp(1.55rem, 3.5vw, 2.65rem);
         font-weight: 700;
@@ -789,7 +796,7 @@
       }
       .wrap.hero__grid--photo .hero__figure {
         position: relative;
-        z-index: 0;
+        z-index: 1;
       }
       .hero__main,
       .wrap.hero__grid--photo .hero__panel {
@@ -1773,7 +1780,7 @@
         margin: 0.35rem 0;
       }
       #coffee-lab {
-        scroll-margin-top: calc(var(--nav-h) + 16px);
+        scroll-margin-top: calc(var(--nav-h) + 8px);
       }
       .coffee-lab {
         margin: 0 0 1.85rem;
@@ -1789,6 +1796,13 @@
       .coffee-lab__lede {
         margin: 0 0 1.1rem !important;
         max-width: 40rem;
+      }
+      .coffee-lab__heading--after-grid {
+        margin-top: 1.05rem;
+      }
+      .coffee-lab__lede--after-grid {
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.9rem !important;
       }
       .coffee-lab__grid {
         display: grid;
@@ -1817,6 +1831,90 @@
       .coffee-lab-card:focus-visible {
         outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
         outline-offset: 3px;
+      }
+      button.coffee-lab-card {
+        appearance: none;
+        -webkit-appearance: none;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        width: 100%;
+      }
+      .coffee-lab-card.is-selected {
+        border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+        box-shadow: 0 14px 38px -16px rgba(30, 22, 12, 0.28);
+      }
+      .coffee-lab-card.is-selected:hover {
+        box-shadow: 0 20px 46px -18px rgba(30, 22, 12, 0.32);
+      }
+      [data-theme="dark"] .coffee-lab-card.is-selected {
+        box-shadow: 0 16px 44px -14px rgba(0, 0, 0, 0.62);
+      }
+      .coffee-lab__eyebrow {
+        margin: 0 0 0.35rem;
+      }
+      .coffee-lab__page-title {
+        font-family: var(--font-display);
+        font-size: clamp(1.35rem, 2.8vw, 1.85rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        margin: 0 0 0.65rem;
+        color: var(--text);
+        line-height: 1.25;
+      }
+      .coffee-lab--primary {
+        margin-bottom: 1.25rem;
+      }
+      .coffee-cal-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(11rem, 240px);
+        gap: 1.25rem 1.35rem;
+        align-items: start;
+        margin-bottom: 2rem;
+      }
+      .coffee-cal-layout__main .booking-iframe-wrap {
+        max-width: none;
+      }
+      .coffee-cal-note {
+        margin: 0 0 0.75rem !important;
+        font-size: 0.82rem !important;
+        line-height: 1.55;
+        color: var(--text-muted) !important;
+      }
+      .time-box--compact {
+        padding: 0.72rem 0.88rem;
+        margin-bottom: 0;
+        max-width: none;
+      }
+      .time-box--compact p {
+        font-size: 0.8rem;
+        margin: 0.18rem 0;
+        line-height: 1.48;
+      }
+      .time-box--compact p:first-child {
+        margin-top: 0;
+      }
+      .section-head--soft {
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+      .section-head--soft .sub {
+        max-width: 42rem;
+      }
+      .coffee-fallback-email {
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin: 0 0 1rem;
+      }
+      .coffee-fallback-email a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      @media (max-width: 900px) {
+        .coffee-cal-layout {
+          grid-template-columns: 1fr;
+        }
       }
       .coffee-lab-card__dur {
         font-size: 0.68rem;
@@ -4619,63 +4717,21 @@
         </div>
       </section>
 
-      <section class="coffee" id="coffee" aria-labelledby="coffee-heading">
+      <section class="coffee coffee-invite-section" id="coffee" aria-labelledby="coffee-heading">
         <div class="wrap">
-          <header class="section-head">
-            <p class="section-eyebrow" lang="en">LET&apos;S TALK</p>
-            <h2 id="coffee-heading">
-              <span class="i18n-zh">对谈与共创 · Coffee Chat</span
-              ><span class="i18n-en" lang="en">Conversation &amp; co-creation</span>
+          <div class="coffee-lab coffee-lab--primary">
+            <p class="section-eyebrow coffee-lab__eyebrow" lang="en">LET&apos;S TALK</p>
+            <h2 id="coffee-heading" class="coffee-lab__page-title">
+              <span class="i18n-zh">对谈与共创 · Coffee Chat</span><span class="i18n-en" lang="en">Conversation &amp; co-creation</span>
             </h2>
-            <div class="coffee-intro-block i18n-zh" lang="zh-CN">
-              <p class="sub">
-                欢迎聊<strong>职业规划、留学申请、运营增长、内容商业化</strong>，以及如何<strong>把 AI 带进工作流</strong>。<strong>下面几步</strong>是可预约的交流入口：<strong>先对齐背景与问题，再把下一步说清楚</strong>。
-              </p>
-              <p class="sub coffee-booking-intro__ttl"><strong>预约方式</strong></p>
-              <ul class="coffee-booking-intro__list">
-                <li>在下方<strong>数字实验室</strong>选时段类型（15 / 30 / 60 分钟），跳转 Calendly 锁时间</li>
-                <li>或填表单留意向与时间偏好，我会按会议方式回信</li>
-                <li>亦可展开<strong>自助预约</strong>在内嵌日历中选 30 分钟时段</li>
-              </ul>
-              <p class="sub coffee-demo-note" id="coffeeDemoNoteZh" hidden>
-                <strong>注：</strong>当前为演示状态，提交仅作测试，不会发送真实邮件。
-              </p>
-              <p class="sub coffee-cal-hint" id="coffeeCalHintZh" hidden></p>
-            </div>
-            <div class="coffee-intro-block i18n-en" lang="en">
-              <p class="sub">
-                Open to chat on <strong>career paths, admissions, growth &amp; ops, monetization,</strong> and
-                <strong>practical AI in real workflows</strong>—quick alignment and a clearer next step.
-              </p>
-              <p class="sub coffee-booking-intro__ttl"><strong>How to book</strong></p>
-              <ul class="coffee-booking-intro__list">
-                <li>Pick a session in the <strong>Digital Lab</strong> below (15 / 30 / 60 min)—opens Calendly.</li>
-                <li>Or use the form for intent + timing; I’ll reply with meeting details.</li>
-                <li>Or expand <strong>self-book</strong> for an embedded 30-minute calendar.</li>
-              </ul>
-              <p class="sub coffee-demo-note" id="coffeeDemoNoteEn" hidden>
-                <strong>Note:</strong> Demo mode—submits aren’t emailed yet.
-              </p>
-              <p class="sub coffee-cal-hint" id="coffeeCalHintEn" hidden></p>
-            </div>
-          </header>
-          <div id="coffee-lab" class="coffee-lab" aria-labelledby="coffee-lab-heading">
-            <h3 id="coffee-lab-heading" class="coffee-lab__heading">
-              <span class="i18n-zh">数字实验室 · 预约时段</span><span class="i18n-en" lang="en">Digital Lab · Book a session</span>
-            </h3>
-            <p class="sub coffee-lab__lede">
-              <span class="i18n-zh" lang="zh-CN"
-                >三种时长对应不同密度的对话——像在实验室里选一支「试管」：从轻量对齐到深度拆解与共创。</span
-              ><span class="i18n-en" lang="en"
-                >Three lengths for three energies—like picking an experiment: quick sync, deep dive, or full co-creation.</span
-              >
-            </p>
-            <div class="coffee-lab__grid">
-              <a
+            <div id="coffee-lab" class="coffee-lab__grid" role="toolbar" aria-labelledby="coffee-lab-heading" aria-label="预约时长">
+              <button
+                type="button"
                 class="coffee-lab-card"
-                href="https://calendly.com/april-zhao-wustl/new-meeting"
-                target="_blank"
-                rel="noopener noreferrer"
+                data-calendly-url="https://calendly.com/april-zhao-wustl/new-meeting"
+                data-title-zh="Flash Sync · 闪电碰撞"
+                data-title-en="Flash Sync · quick hello"
+                aria-pressed="false"
               >
                 <p class="coffee-lab-card__dur">15 min · 15 分钟</p>
                 <p class="coffee-lab-card__titles">
@@ -4684,15 +4740,17 @@
                 <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">适合快速解决一个小疑问，或者初步认识一下。</p>
                 <p class="coffee-lab-card__desc i18n-en" lang="en">Quick questions or a first hello—fast alignment.</p>
                 <span class="coffee-lab-card__cta"
-                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="i18n-zh">在下方日历中选时段</span><span class="i18n-en" lang="en">Pick a slot below</span
                   ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
                 >
-              </a>
-              <a
-                class="coffee-lab-card"
-                href="https://calendly.com/april-zhao-wustl/30min"
-                target="_blank"
-                rel="noopener noreferrer"
+              </button>
+              <button
+                type="button"
+                class="coffee-lab-card is-selected"
+                data-calendly-url="https://calendly.com/april-zhao-wustl/30min"
+                data-title-zh="Deep Dive · 深度拆解"
+                data-title-en="Deep Dive · deep dive"
+                aria-pressed="true"
               >
                 <p class="coffee-lab-card__dur">30 min · 30 分钟</p>
                 <p class="coffee-lab-card__titles">
@@ -4701,15 +4759,17 @@
                 <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">针对具体的 AI 运营、0→1 项目进行深入探讨。</p>
                 <p class="coffee-lab-card__desc i18n-en" lang="en">Go deeper on AI in ops, growth, and 0→1 projects.</p>
                 <span class="coffee-lab-card__cta"
-                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="i18n-zh">在下方日历中选时段</span><span class="i18n-en" lang="en">Pick a slot below</span
                   ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
                 >
-              </a>
-              <a
+              </button>
+              <button
+                type="button"
                 class="coffee-lab-card"
-                href="https://calendly.com/april-zhao-wustl/let-s-talk"
-                target="_blank"
-                rel="noopener noreferrer"
+                data-calendly-url="https://calendly.com/april-zhao-wustl/let-s-talk"
+                data-title-zh="Co-Creation Lab · 协作共创"
+                data-title-en="Co-Creation Lab · co-creation"
+                aria-pressed="false"
               >
                 <p class="coffee-lab-card__dur">1 hour · 1 小时</p>
                 <p class="coffee-lab-card__titles">
@@ -4718,243 +4778,111 @@
                 <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">适合真正的脑暴、长谈或者深度咨询。</p>
                 <p class="coffee-lab-card__desc i18n-en" lang="en">Brainstorms, long conversations, or intensive consulting.</p>
                 <span class="coffee-lab-card__cta"
-                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="i18n-zh">在下方日历中选时段</span><span class="i18n-en" lang="en">Pick a slot below</span
                   ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
                 >
-              </a>
+              </button>
             </div>
-          </div>
-          <div class="time-box" id="coffee-time-box">
-            <p id="timeBoxLine1z" class="i18n-zh"><strong>可沟通时间（参考）</strong></p>
-            <p id="timeBoxLine1e" class="i18n-en" lang="en"><strong>Availability (guide)</strong></p>
-            <p class="i18n-zh">周一至周五 · 20:00–23:00</p>
-            <p class="i18n-zh">周六 · 08:30–23:45</p>
-            <p class="i18n-zh">周日 · 08:30–23:00</p>
-            <p class="i18n-zh">时区：GMT+8（与 Calendly 常用工时对齐）</p>
-            <p class="i18n-en" lang="en">
-              Timezone GMT+8 (China / SG / Perth).<br />Mon–Fri: 20:00–23:00<br />Sat: 08:30–23:45<br />Sun:
-              08:30–23:00
+            <h3 id="coffee-lab-heading" class="coffee-lab__heading coffee-lab__heading--after-grid">
+              <span class="i18n-zh">数字实验室 · 预约时段</span><span class="i18n-en" lang="en">Digital Lab · Book a session</span>
+            </h3>
+            <p class="sub coffee-lab__lede coffee-lab__lede--after-grid">
+              <span class="i18n-zh" lang="zh-CN"
+                >点选一支「试管」，下方内嵌日历会切换为对应 Event；姓名与话题可在 Calendly 预约流程里填写。</span
+              ><span class="i18n-en" lang="en"
+                >Tap a session—the embedded calendar swaps to that event; name &amp; notes live in Calendly&apos;s flow.</span
+              >
             </p>
-            <p class="i18n-zh" style="margin-top: 0.65rem">最终以邮件或日历确认为准。</p>
-            <p class="i18n-en" lang="en" style="margin-top: 0.65rem">Final slot by email / calendar invite.</p>
           </div>
-          <div class="coffee-form-shell">
-          <form class="form coffee-booking-form" id="coffeeForm" novalidate>
-            <input
-              type="text"
-              name="_gotcha"
-              tabindex="-1"
-              autocomplete="off"
-              aria-hidden="true"
-              style="position: absolute; left: -9000px; width: 1px; height: 1px; opacity: 0"
-            />
-            <div class="field">
-              <label for="c-name"
-                ><span class="i18n-zh">姓名 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Name <abbr class="field-req" title="Required">*</abbr></span></label
-              >
-              <input
-                id="c-name"
-                name="name"
-                type="text"
-                required
-                autocomplete="name"
-                data-ph-zh="如何称呼您"
-                data-ph-en="What should I call you?"
-              />
-            </div>
-            <div class="field">
-              <label for="c-email"
-                ><span class="i18n-zh">联系邮箱 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Email <abbr class="field-req" title="Required">*</abbr></span></label
-              >
-              <input
-                id="c-email"
-                name="email"
-                type="email"
-                required
-                autocomplete="email"
-                data-ph-zh="用于回复与发送会议信息"
-                data-ph-en="For replies and meeting details"
-              />
-            </div>
-            <div class="field">
-              <label for="c-topic"
-                ><span class="i18n-zh">想聊的话题 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Topic <abbr class="field-req" title="Required">*</abbr></span></label
-              >
-              <select id="c-topic" name="topic" required>
-                <option value="" disabled selected data-zh-label="请选择话题" data-en-label="Pick a topic">请选择话题</option>
-                <option value="career" data-zh-label="职业规划" data-en-label="Career">职业规划</option>
-                <option value="school" data-zh-label="留学申请" data-en-label="Admissions">留学申请</option>
-                <option value="growth" data-zh-label="运营增长" data-en-label="Growth &amp; ops">运营增长</option>
-                <option value="content" data-zh-label="内容商业化" data-en-label="Content monetization">内容商业化</option>
-                <option value="ai" data-zh-label="AI 应用" data-en-label="Practical AI">AI 应用</option>
-                <option value="other" data-zh-label="其他" data-en-label="Other">其他</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="c-meeting"
-                ><span class="i18n-zh">希望使用的会议方式 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Meeting tool <abbr class="field-req" title="Required">*</abbr></span
-                ></label
-              >
-              <select id="c-meeting" name="meeting" required>
-                <option value="" disabled selected data-zh-label="请选择" data-en-label="Choose">请选择</option>
-                <option value="zoom">Zoom</option>
-                <option value="tencent" data-zh-label="腾讯会议" data-en-label="Tencent Meeting">腾讯会议</option>
-                <option value="either" data-zh-label="均可" data-en-label="Either works">均可</option>
-                <option value="email" data-zh-label="先邮件对齐再约时间" data-en-label="Email first, then schedule"
-                  >先邮件对齐再约时间</option
-                >
-              </select>
-            </div>
-            <div class="field">
-              <label for="c-date"
-                ><span class="i18n-zh">希望沟通日期 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Preferred date <abbr class="field-req" title="Required">*</abbr></span
-                ></label
-              >
-              <input id="c-date" name="date" type="date" required />
-            </div>
-            <div class="field">
-              <label for="c-slot"
-                ><span class="i18n-zh">偏好的小时段 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Time window <abbr class="field-req" title="Required">*</abbr></span
-                ></label
-              >
-              <select id="c-slot" name="slot" required>
-                <option value="" disabled selected data-zh-label="请选择时段" data-en-label="Pick a window"
-                  >请选择时段</option
-                >
-                <option data-zh-label="工作日 20:00–21:00" data-en-label="Weekdays · 20:00–21:00">工作日 20:00–21:00</option>
-                <option data-zh-label="工作日 21:00–22:00" data-en-label="Weekdays · 21:00–22:00">工作日 21:00–22:00</option>
-                <option data-zh-label="工作日 22:00–23:00" data-en-label="Weekdays · 22:00–23:00">工作日 22:00–23:00</option>
-                <option data-zh-label="周六 08:30–12:00" data-en-label="Sat · 08:30–12:00">周六 08:30–12:00</option>
-                <option data-zh-label="周六 12:00–15:00" data-en-label="Sat · 12:00–15:00">周六 12:00–15:00</option>
-                <option data-zh-label="周六 15:00–18:00" data-en-label="Sat · 15:00–18:00">周六 15:00–18:00</option>
-                <option data-zh-label="周六 18:00–21:00" data-en-label="Sat · 18:00–21:00">周六 18:00–21:00</option>
-                <option data-zh-label="周六 21:00–23:45" data-en-label="Sat · 21:00–23:45">周六 21:00–23:45</option>
-                <option data-zh-label="周日 08:30–12:00" data-en-label="Sun · 08:30–12:00">周日 08:30–12:00</option>
-                <option data-zh-label="周日 12:00–15:00" data-en-label="Sun · 12:00–15:00">周日 12:00–15:00</option>
-                <option data-zh-label="周日 15:00–18:00" data-en-label="Sun · 15:00–18:00">周日 15:00–18:00</option>
-                <option data-zh-label="周日 18:00–21:00" data-en-label="Sun · 18:00–21:00">周日 18:00–21:00</option>
-                <option data-zh-label="周日 21:00–23:00" data-en-label="Sun · 21:00–23:00">周日 21:00–23:00</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="c-msg"
-                ><span class="i18n-zh">补充说明（选填）</span
-                ><span class="i18n-en" lang="en">Notes (optional)</span></label
-              >
-              <textarea
-                id="c-msg"
-                name="message"
-                rows="3"
-                data-ph-zh="想聊的方向、已知背景或会议号（可选）"
-                data-ph-en="Context, agenda, or room link (optional)"
-              ></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" id="coffeeFormSubmit">
-              <span class="i18n-zh" id="coffeeBtnZh">提交预约</span
-              ><span class="i18n-en" id="coffeeBtnEn" lang="en">Submit</span>
-            </button>
-          </form>
-          </div>
-          <details class="coffee-cal-optional" id="coffee-cal-optional" style="margin-top: 1.75rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.95rem 1.15rem; background: var(--bg-elevated)">
-            <summary
-              class="coffee-cal-optional__summary"
-              id="cal-summary"
-              style="font-weight: 600; cursor: pointer; list-style-position: outside"
-            >
-              <span class="i18n-zh"
-                >可选 · 自助预约<span
-                  style="
-                    display: block;
-                    font-weight: 500;
-                    font-size: 0.88rem;
-                    color: var(--text-muted);
-                    margin-top: 0.3rem;
-                  "
-                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）</span
-                ></span
-              >
-              <span class="i18n-en" lang="en"
-                >Optional · self-book<span
-                  style="
-                    display: block;
-                    font-weight: 500;
-                    font-size: 0.88rem;
-                    color: var(--text-muted);
-                    margin-top: 0.3rem;
-                  "
-                  >Open slots inline or in a tab—calendar sync when connected.</span
-                ></span
-              >
-            </summary>
-            <div class="booking-hint" id="booking-setup-hint" style="margin-top: 0.85rem">
-              <p class="i18n-zh" lang="zh-CN">
-                接好日历后，这里会显示可约表；也可单独用
-                <a href="https://cal.com" target="_blank" rel="noopener noreferrer">Cal.com</a> /
-                <a href="https://calendly.com" target="_blank" rel="noopener noreferrer">Calendly</a> 新开页。与表单可二选一或搭配。
+
+          <div class="coffee-cal-layout">
+            <div class="coffee-cal-layout__main">
+              <!-- Calendly 后台请将会议标题改为与卡片一致（如 Deep Dive / 深度拆解），内嵌已隐藏落地页大标题 -->
+              <p class="sub coffee-cal-note">
+                <span class="i18n-zh" lang="zh-CN">嵌入已精简页眉（hide_landing_page_details）；后台事件名称也请与实验室卡片一致。</span>
+                <span class="i18n-en" lang="en">Embedded view hides the landing header—mirror titles in Calendly admin.</span>
               </p>
-              <p class="i18n-en" lang="en" style="margin-top: 0.45rem">
-                Wire your calendar here, or link out to Cal / Calendly—use solo or alongside the form.
-              </p>
-            </div>
-            <div class="booking-embed-block" id="booking-embed-block" hidden>
-              <h3 class="booking-embed-title" id="booking-embed-title">
-                <span class="i18n-zh i18n-embed-title">选择时段</span
-                ><span class="i18n-en i18n-embed-title" lang="en">Pick a time</span>
-              </h3>
-              <div class="booking-iframe-wrap">
-                <iframe
-                  id="booking-iframe"
-                  class="booking-live-iframe"
-                  title="Book a time — Coffee chat"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  allow="camera; microphone; fullscreen; payment"
-                  hidden
-                ></iframe>
+              <div class="booking-embed-block" id="booking-embed-block" hidden>
+                <h3 class="booking-embed-title" id="booking-embed-title-wrap">
+                  <span id="booking-embed-title-zh" class="i18n-zh">Deep Dive · 深度拆解</span>
+                  <span id="booking-embed-title-en" class="i18n-en" lang="en">Deep Dive · deep dive</span>
+                </h3>
+                <div class="booking-iframe-wrap">
+                  <iframe
+                    id="booking-iframe"
+                    class="booking-live-iframe"
+                    title="Calendly — April Zhao"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    allow="camera; microphone; fullscreen; payment"
+                    hidden
+                  ></iframe>
+                </div>
+                <p class="booking-embed-foot" id="booking-embed-link-wrap" hidden>
+                  <a
+                    class="btn btn-ghost"
+                    id="booking-open-external"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><span class="i18n-zh">新窗口打开当前日程</span
+                    ><span class="i18n-en" lang="en">Open this event in a tab</span></a
+                  >
+                </p>
               </div>
-              <p class="booking-embed-foot" id="booking-embed-link-wrap" hidden>
+              <div class="booking-embed-block" id="booking-link-only" hidden>
+                <h3 class="booking-embed-title">
+                  <span class="i18n-zh">连接日历后即可预约</span
+                  ><span class="i18n-en" lang="en">Connect a calendar to enable booking</span>
+                </h3>
+                <p class="sub i18n-zh" style="margin-top: 0; margin-bottom: 1rem">
+                  配置 APRIL_BOOKING 中的 Calendly 链接后，卡片将驱动下方内嵌日历。
+                </p>
+                <p class="sub i18n-en" style="margin-top: 0; margin-bottom: 1rem" lang="en">
+                  Add your Calendly URLs in <code>APRIL_BOOKING</code> to enable the embedded picker.
+                </p>
                 <a
-                  class="btn btn-ghost"
-                  id="booking-open-external"
+                  class="btn btn-primary"
+                  id="booking-link-only-btn"
                   href="#"
                   target="_blank"
                   rel="noopener noreferrer"
-                  ><span class="i18n-zh">全屏打开预约</span
-                  ><span class="i18n-en" lang="en">Open booking page</span></a
+                  ><span class="i18n-zh">打开 Calendly</span><span class="i18n-en" lang="en">Open Calendly</span></a
                 >
-              </p>
+              </div>
             </div>
-            <div class="booking-embed-block" id="booking-link-only" hidden>
-              <h3 class="booking-embed-title">
-                <span class="i18n-zh">在日历中完成预约</span
-                ><span class="i18n-en" lang="en">Complete booking in a new tab</span>
-              </h3>
-              <p class="sub i18n-zh" style="margin-top: 0; margin-bottom: 1rem">
-                已指向预约页。选好时段后，由平台跟进邮件与日历邀请（接了 Zoom 会一并带出）。
-              </p>
-              <p class="sub i18n-en" style="margin-top: 0; margin-bottom: 1rem" lang="en">
-                Booking link is live—the app sends slots, emails, calendar, and Zoom if linked.
-              </p>
-              <a
-                class="btn btn-primary"
-                id="booking-link-only-btn"
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                ><span class="i18n-zh">选择可约时间</span
-                ><span class="i18n-en" lang="en">Choose a slot</span></a
-              >
-            </div>
-          </details>
+            <aside class="coffee-cal-layout__aside">
+              <div class="time-box time-box--compact" id="coffee-time-box">
+                <p id="timeBoxLine1z" class="i18n-zh"><strong>可沟通时间（参考）</strong></p>
+                <p id="timeBoxLine1e" class="i18n-en" lang="en"><strong>Availability (guide)</strong></p>
+                <p class="i18n-zh">周一至周五 · 20:00–23:00</p>
+                <p class="i18n-zh">周六 · 08:30–23:45</p>
+                <p class="i18n-zh">周日 · 08:30–23:00</p>
+                <p class="i18n-zh">时区：GMT+8（与 Calendly 常用工时对齐）</p>
+                <p class="i18n-en" lang="en">
+                  GMT+8 · Mon–Fri 20:00–23:00<br />Sat 08:30–23:45 · Sun 08:30–23:00
+                </p>
+                <p class="i18n-zh" style="margin-top: 0.5rem">最终以日历确认为准。</p>
+                <p class="i18n-en" lang="en" style="margin-top: 0.5rem">Final slot by calendar invite.</p>
+              </div>
+            </aside>
+          </div>
+
+          <div class="coffee-invite-copy section-head section-head--soft">
+            <p class="sub i18n-zh" lang="zh-CN">
+              欢迎聊<strong>职业规划、留学申请、运营增长、内容商业化</strong>，以及如何<strong>把 AI 带进工作流</strong>——预约成功后我们会用邮件把会议细节对齐。
+            </p>
+            <p class="sub i18n-en" lang="en">
+              Happy to discuss <strong>careers, admissions, growth &amp; ops, monetization,</strong> and
+              <strong>practical AI in workflows</strong>—after you pick a slot we&apos;ll align details by email.
+            </p>
+          </div>
+
+          <p class="coffee-fallback-email">
+            <span class="i18n-zh">没有合适的时间？写信给我：</span>
+            <span class="i18n-en" lang="en">No slot works? Email me:</span>
+            <a href="mailto:april.zhao@wustl.edu">april.zhao@wustl.edu</a>
+          </p>
         </div>
       </section>
     </main>
@@ -5094,41 +5022,6 @@
       </div>
     </footer>
 
-    <div class="modal-backdrop" id="okModal" role="dialog" aria-modal="true" aria-labelledby="okTitle" hidden>
-      <div class="modal">
-        <div id="okModalModeDemo" class="ok-modal-mode">
-          <h3 id="okTitle">
-            <span class="i18n-zh">已记录（本机演示）</span><span class="i18n-en" lang="en">Noted (local demo)</span>
-          </h3>
-          <p class="i18n-zh" lang="zh-CN">
-            这是一次演示提交，信息没有发到邮箱。正式上线后表单会投递到我配置的收件箱；你也可以发邮件至
-            april.zhao@wustl.edu，或使用下方自助预约入口。
-          </p>
-          <p class="i18n-en" lang="en">
-            Nothing was delivered in this demo. When the site is connected, submissions go to my inbox—or email
-            april.zhao@wustl.edu, or open the optional self-booking block below.
-          </p>
-        </div>
-        <div id="okModalModeSent" class="ok-modal-mode" hidden>
-          <h3 id="okTitleSent">
-            <span class="i18n-zh">已发出</span><span class="i18n-en" lang="en">Message sent</span>
-          </h3>
-          <p class="i18n-zh" lang="zh-CN">
-            表单已投递。请到邮箱查看（含垃圾箱）；若这是你第一次用 FormSubmit，请先到来自 FormSubmit 的邮件里<strong>激活表单</strong>，否则会一直转不到收件箱。
-            我会按你选的会议方式回邮；若你已用下方 Calendly 约成时间，以日历邀请为准。
-          </p>
-          <p class="i18n-en" lang="en">
-            Posted—check inbox and spam. If this is your first FormSubmit form, click the activation link in their email
-            or confirmations won’t go through. I’ll reply using your preferred meeting tool; if you booked via Calendly below,
-            follow that calendar invite.
-          </p>
-        </div>
-        <button type="button" class="btn btn-primary" id="okClose">
-          <span class="i18n-zh">好的</span><span class="i18n-en" lang="en">OK</span>
-        </button>
-      </div>
-    </div>
-
     <script>
       (function () {
         const header = document.getElementById("siteHeader");
@@ -5204,168 +5097,6 @@
           if (e.key === "Escape") setDrawer(false);
         });
 
-        const form = document.getElementById("coffeeForm");
-        const okModal = document.getElementById("okModal");
-        const okModalModeDemo = document.getElementById("okModalModeDemo");
-        const okModalModeSent = document.getElementById("okModalModeSent");
-        const okClose = document.getElementById("okClose");
-        function setModal(open, resultMode) {
-          if (!okModal) return;
-          if (open && okModalModeDemo && okModalModeSent) {
-            var isSent = resultMode === "sent";
-            okModalModeDemo.hidden = isSent;
-            okModalModeSent.hidden = !isSent;
-            okModal.setAttribute("aria-labelledby", isSent ? "okTitleSent" : "okTitle");
-          } else if (!open && okModalModeDemo && okModalModeSent) {
-            okModalModeDemo.hidden = false;
-            okModalModeSent.hidden = true;
-            okModal.setAttribute("aria-labelledby", "okTitle");
-          }
-          okModal.classList.toggle("is-open", open);
-          okModal.hidden = !open;
-        }
-        if (form) {
-          form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            if (!form.checkValidity()) {
-              form.reportValidity();
-              return;
-            }
-            var book = window.APRIL_BOOKING || {};
-            var postUrl = (book.formSubmitUrl && String(book.formSubmitUrl).trim()) || "";
-            if (postUrl) {
-              var btn = form.querySelector('button[type="submit"]');
-              if (btn) btn.disabled = true;
-              var fd = new FormData(form);
-              var honey = fd.get("_gotcha");
-              if (honey && String(honey).trim()) {
-                if (btn) btn.disabled = false;
-                return;
-              }
-              var subj = (book.formEmailSubject && String(book.formEmailSubject).trim()) || "个人站：Coffee chat 意向";
-              var ccEmail =
-                book.formSubmitCc && String(book.formSubmitCc).trim();
-              fd.set("_subject", subj);
-              var formsubmitAjax = /^https:\/\/formsubmit\.co\/ajax\//i.test(postUrl);
-              var isGoogleAppsScript = /script\.google\.com\/macros\//i.test(postUrl);
-              if (ccEmail && !formsubmitAjax) {
-                fd.set("_cc", ccEmail);
-              }
-              if (isGoogleAppsScript) {
-                var gasSecret =
-                  book.googleAppsScriptFormSecret && String(book.googleAppsScriptFormSecret).trim();
-                var params = new URLSearchParams();
-                fd.forEach(function (v, k) {
-                  if (k === "_gotcha") return;
-                  params.append(k, String(v));
-                });
-                params.set("_subject", subj);
-                try {
-                  params.set("submitted_from", typeof location !== "undefined" ? location.href : "");
-                } catch (e1) {}
-                if (gasSecret) params.set("form_secret", gasSecret);
-                fetch(postUrl, {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: params.toString(),
-                  referrerPolicy: "unsafe-url",
-                })
-                  .then(function () {
-                    setModal(true, "sent");
-                    form.reset();
-                    syncCoffeeFormStrings(getLocale());
-                  })
-                  .catch(function () {
-                    window.alert(
-                      getLocale() === "en"
-                        ? "Could not send just now—please retry or email me directly."
-                        : "发送暂时失败，请稍后重试，或直接发邮件联系。"
-                    );
-                  })
-                  .finally(function () {
-                    if (btn) btn.disabled = false;
-                  });
-                return;
-              }
-              var fetchInit = formsubmitAjax
-                ? (function () {
-                    var payload = {};
-                    fd.forEach(function (v, k) {
-                      if (k === "_gotcha") return;
-                      payload[k] = v;
-                    });
-                    payload._subject = subj;
-                    if (payload.email) payload._replyto = payload.email;
-                    payload._template = "table";
-                    payload._captcha = false;
-                    payload.submitted_from =
-                      typeof location !== "undefined" ? location.href : "";
-                    if (ccEmail) payload._cc = ccEmail;
-                    return {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json", Accept: "application/json" },
-                      body: JSON.stringify(payload)
-                    };
-                  })()
-                : { method: "POST", body: fd, headers: { Accept: "application/json" } };
-              fetch(postUrl, Object.assign({ referrerPolicy: "unsafe-url" }, fetchInit))
-                .then(function (res) {
-                  return res.text().then(function (t) {
-                    var obj = {};
-                    try {
-                      obj = t ? JSON.parse(t) : {};
-                    } catch (ignored) {}
-                    return { ok: res.ok, json: obj, text: t };
-                  });
-                })
-                .then(function (ret) {
-                  if (formsubmitAjax && ret.json && "success" in ret.json) {
-                    var s = ret.json.success;
-                    if (s !== true && s !== "true") {
-                      window.alert(
-                        ret.json.message ||
-                          (getLocale() === "en"
-                            ? "The form backend did not accept this submission."
-                            : "表单服务未受理本次提交（请根据提示处理后重试）。")
-                      );
-                      return;
-                    }
-                  } else if (!ret.ok) {
-                    throw new Error("form post failed");
-                  }
-                  setModal(true, "sent");
-                  form.reset();
-                  syncCoffeeFormStrings(getLocale());
-                })
-                .catch(function () {
-                  window.alert(
-                    getLocale() === "en"
-                      ? "Could not send just now—please retry or email me directly."
-                      : "发送暂时失败，请稍后重试，或直接发邮件联系。"
-                  );
-                })
-                .finally(function () {
-                  if (btn) btn.disabled = false;
-                });
-            } else {
-              setModal(true, "demo");
-              form.reset();
-              syncCoffeeFormStrings(getLocale());
-            }
-          });
-        }
-        if (okClose) {
-          okClose.addEventListener("click", function () {
-            setModal(false);
-          });
-        }
-        if (okModal) {
-          okModal.addEventListener("click", function (e) {
-            if (e.target === okModal) setModal(false);
-          });
-        }
-
         var LOCALE_KEY = "april-locale";
         function getLocale() {
           return document.body.getAttribute("data-locale") === "en" ? "en" : "zh";
@@ -5388,6 +5119,126 @@
             });
           });
         }
+
+        var refreshCoffeeBookingTitles = function () {};
+
+        (function initCoffeeBooking() {
+          var cfg = window.APRIL_BOOKING || {};
+          var embedBlock = document.getElementById("booking-embed-block");
+          var linkOnlyBlock = document.getElementById("booking-link-only");
+          var linkOnlyBtn = document.getElementById("booking-link-only-btn");
+          var bookingIframe = document.getElementById("booking-iframe");
+          var linkWrap = document.getElementById("booking-embed-link-wrap");
+          var openExt = document.getElementById("booking-open-external");
+          var embedTitleZh = document.getElementById("booking-embed-title-zh");
+          var embedTitleEn = document.getElementById("booking-embed-title-en");
+
+          function calendlyEmbedIframeSrc(scheduleUrl) {
+            try {
+              var raw = scheduleUrl.trim();
+              var u = new URL(raw.indexOf("//") !== -1 ? raw : "https://" + raw);
+              var domain =
+                typeof location !== "undefined" && location.hostname
+                  ? location.hostname
+                  : "localhost";
+              u.searchParams.set("embed_domain", domain);
+              u.searchParams.set("embed_type", "Inline");
+              u.searchParams.set("hide_landing_page_details", "1");
+              return u.toString();
+            } catch (err) {
+              return scheduleUrl;
+            }
+          }
+
+          function applyTitlesFromButton(btn) {
+            if (!btn) return;
+            var zh = btn.getAttribute("data-title-zh");
+            var en = btn.getAttribute("data-title-en");
+            if (embedTitleZh && zh) embedTitleZh.textContent = zh;
+            if (embedTitleEn && en) embedTitleEn.textContent = en;
+          }
+
+          function selectLabCard(btn) {
+            document.querySelectorAll(".coffee-lab-card[data-calendly-url]").forEach(function (b) {
+              var on = b === btn;
+              b.classList.toggle("is-selected", on);
+              b.setAttribute("aria-pressed", on ? "true" : "false");
+            });
+          }
+
+          function loadCalendlyEmbed(calUrl, titleBtn) {
+            if (!calUrl || !bookingIframe || !embedBlock) return;
+            embedBlock.hidden = false;
+            if (linkOnlyBlock) linkOnlyBlock.hidden = true;
+            bookingIframe.classList.add("booking-live-iframe");
+            bookingIframe.hidden = false;
+            bookingIframe.src = calendlyEmbedIframeSrc(calUrl);
+            applyTitlesFromButton(titleBtn || document.querySelector(".coffee-lab-card.is-selected[data-calendly-url]"));
+            if (openExt) openExt.href = calUrl;
+            if (linkWrap) linkWrap.hidden = false;
+          }
+
+          var embedUrl = cfg.embedUrl && String(cfg.embedUrl).trim();
+          var calendlyUrl = cfg.calendlyInlineUrl && String(cfg.calendlyInlineUrl).trim();
+          var hasCalendly = Boolean(calendlyUrl);
+          var hasIframeEmbed = Boolean(embedUrl);
+          var hasEmbed = hasCalendly || hasIframeEmbed;
+          var openTab = cfg.openInNewTabUrl && String(cfg.openInNewTabUrl).trim();
+          var hasTabOnly = Boolean(!hasEmbed && openTab);
+          var tabUrl = openTab || calendlyUrl || embedUrl || "";
+
+          document.querySelectorAll(".coffee-lab-card[data-calendly-url]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var url = btn.getAttribute("data-calendly-url");
+              if (!url) return;
+              selectLabCard(btn);
+              if (hasCalendly && bookingIframe) {
+                loadCalendlyEmbed(url, btn);
+                try {
+                  embedBlock.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                } catch (errScroll) {}
+              } else {
+                window.open(url, "_blank", "noopener,noreferrer");
+              }
+            });
+          });
+
+          refreshCoffeeBookingTitles = function () {
+            var sel = document.querySelector(".coffee-lab-card.is-selected[data-calendly-url]");
+            if (sel) applyTitlesFromButton(sel);
+          };
+
+          if (hasEmbed && embedBlock) {
+            embedBlock.hidden = false;
+            if (linkOnlyBlock) linkOnlyBlock.hidden = true;
+
+            if (hasCalendly && bookingIframe) {
+              var initialUrl = calendlyUrl || "";
+              var selectedBtn = document.querySelector(".coffee-lab-card.is-selected[data-calendly-url]");
+              if (selectedBtn) initialUrl = selectedBtn.getAttribute("data-calendly-url") || initialUrl;
+              if (initialUrl) loadCalendlyEmbed(initialUrl, selectedBtn);
+            } else if (hasIframeEmbed && bookingIframe) {
+              bookingIframe.classList.add("booking-live-iframe");
+              bookingIframe.hidden = false;
+              bookingIframe.src = embedUrl;
+              var sel0 = document.querySelector(".coffee-lab-card.is-selected[data-calendly-url]");
+              applyTitlesFromButton(sel0);
+              if (openExt && tabUrl) {
+                openExt.href = tabUrl;
+                if (linkWrap) linkWrap.hidden = false;
+              }
+            }
+          } else if (hasTabOnly && linkOnlyBlock && linkOnlyBtn) {
+            linkOnlyBtn.href = openTab;
+            linkOnlyBlock.hidden = false;
+            if (embedBlock) embedBlock.hidden = true;
+          } else {
+            if (embedBlock) embedBlock.hidden = true;
+            if (linkOnlyBlock) linkOnlyBlock.hidden = false;
+            if (linkOnlyBtn && tabUrl) linkOnlyBtn.href = tabUrl;
+          }
+        })();
+
         function applyLocale(loc) {
           document.body.setAttribute("data-locale", loc);
           document.documentElement.setAttribute("lang", loc === "en" ? "en" : "zh-CN");
@@ -5402,6 +5253,7 @@
             b.setAttribute("aria-label", loc === "en" ? "Switch to Chinese" : "切换到英文");
           }
           syncCoffeeFormStrings(loc);
+          refreshCoffeeBookingTitles();
           var tw = document.querySelector(".nav-translate-wrap");
           if (tw) {
             tw.setAttribute(
@@ -5481,133 +5333,6 @@
             });
           }
         })();
-        var cfg = window.APRIL_BOOKING || {};
-        var formSubmitUrl = (cfg.formSubmitUrl && String(cfg.formSubmitUrl).trim()) || "";
-        var embedBlock = document.getElementById("booking-embed-block");
-        var linkOnlyBlock = document.getElementById("booking-link-only");
-        var linkOnlyBtn = document.getElementById("booking-link-only-btn");
-        var setupHint = document.getElementById("booking-setup-hint");
-        var bookingIframe = document.getElementById("booking-iframe");
-        var demoNoteZh = document.getElementById("coffeeDemoNoteZh");
-        var demoNoteEn = document.getElementById("coffeeDemoNoteEn");
-        var calHintZh = document.getElementById("coffeeCalHintZh");
-        var calHintEn = document.getElementById("coffeeCalHintEn");
-        var timeBoxLine1z = document.getElementById("timeBoxLine1z");
-        var timeBoxLine1e = document.getElementById("timeBoxLine1e");
-        var linkWrap = document.getElementById("booking-embed-link-wrap");
-        var openExt = document.getElementById("booking-open-external");
-        var calOptional = document.getElementById("coffee-cal-optional");
-        var embedTitleZh = document.querySelector("#booking-embed-title .i18n-zh");
-        var embedTitleEn = document.querySelector("#booking-embed-title .i18n-en");
-
-        function hideCalHints() {
-          if (calHintZh) {
-            calHintZh.hidden = true;
-            calHintZh.textContent = "";
-          }
-          if (calHintEn) {
-            calHintEn.hidden = true;
-            calHintEn.textContent = "";
-          }
-        }
-
-        function setDemoNotes(show) {
-          if (demoNoteZh) demoNoteZh.hidden = !show;
-          if (demoNoteEn) demoNoteEn.hidden = !show;
-        }
-
-        function calendlyEmbedIframeSrc(scheduleUrl) {
-          try {
-            var raw = scheduleUrl.trim();
-            var u = new URL(raw.indexOf("//") !== -1 ? raw : "https://" + raw);
-            var domain =
-              typeof location !== "undefined" && location.hostname
-                ? location.hostname
-                : "localhost";
-            u.searchParams.set("embed_domain", domain);
-            u.searchParams.set("embed_type", "Inline");
-            return u.toString();
-          } catch (err) {
-            return scheduleUrl;
-          }
-        }
-
-        var embedUrl = cfg.embedUrl && String(cfg.embedUrl).trim();
-        var calendlyUrl = cfg.calendlyInlineUrl && String(cfg.calendlyInlineUrl).trim();
-        var hasCalendly = Boolean(calendlyUrl);
-        var hasIframeEmbed = Boolean(embedUrl);
-        var hasEmbed = hasCalendly || hasIframeEmbed;
-        var openTab = cfg.openInNewTabUrl && String(cfg.openInNewTabUrl).trim();
-        var hasTabOnly = Boolean(!hasEmbed && openTab);
-        var tabUrl = openTab || calendlyUrl || embedUrl || "";
-
-        setDemoNotes(!formSubmitUrl);
-
-        if (hasEmbed && embedBlock) {
-          embedBlock.hidden = false;
-          if (linkOnlyBlock) linkOnlyBlock.hidden = true;
-          if (setupHint) setupHint.hidden = true;
-          if (calHintZh) {
-            calHintZh.hidden = false;
-            calHintZh.textContent = formSubmitUrl
-              ? "下方已内嵌日历，可直接选时段；上方表单也会投递到我邮箱，可搭配使用。"
-              : "下方已内嵌日历，可直接点选可约时间。";
-          }
-          if (calHintEn) {
-            calHintEn.hidden = false;
-            calHintEn.textContent = formSubmitUrl
-              ? "Calendar is embedded below; the form also reaches my inbox when enabled—use either or both."
-              : "Calendar is embedded below—pick an open slot.";
-          }
-          if (timeBoxLine1z) {
-            timeBoxLine1z.innerHTML = "<strong>可沟通时间（与日历展示一致）</strong>";
-          }
-          if (timeBoxLine1e) {
-            timeBoxLine1e.innerHTML = "<strong>Hours (match the calendar below)</strong>";
-          }
-          if (embedTitleZh) embedTitleZh.textContent = "选择时段（已连接）";
-          if (embedTitleEn) embedTitleEn.textContent = "Pick a time";
-
-          if (hasCalendly && bookingIframe) {
-            bookingIframe.classList.add("booking-live-iframe");
-            bookingIframe.hidden = false;
-            bookingIframe.src = calendlyEmbedIframeSrc(calendlyUrl);
-          } else if (hasIframeEmbed && bookingIframe) {
-            bookingIframe.classList.add("booking-live-iframe");
-            bookingIframe.hidden = false;
-            bookingIframe.src = embedUrl;
-          }
-
-          if (openExt && tabUrl) {
-            openExt.href = tabUrl;
-            if (linkWrap) linkWrap.hidden = false;
-          }
-          if (calOptional) calOptional.open = true;
-        } else if (hasTabOnly && linkOnlyBlock && linkOnlyBtn) {
-          linkOnlyBtn.href = openTab;
-          linkOnlyBlock.hidden = false;
-          if (embedBlock) embedBlock.hidden = true;
-          if (setupHint) setupHint.hidden = true;
-          if (calHintZh) {
-            calHintZh.hidden = false;
-            calHintZh.textContent = formSubmitUrl
-              ? "下方按钮可打开预约页选时段；上方表单亦会发到邮箱，可搭配使用。"
-              : "下方按钮可打开预约页，查看可约时间。";
-          }
-          if (calHintEn) {
-            calHintEn.hidden = false;
-            calHintEn.textContent = formSubmitUrl
-              ? "Use the button below for an external booking page; the form also posts when enabled."
-              : "Use the button below to open booking in a new tab.";
-          }
-          if (calOptional) calOptional.open = true;
-        } else {
-          if (embedBlock) embedBlock.hidden = true;
-          if (linkOnlyBlock) linkOnlyBlock.hidden = true;
-          if (setupHint) setupHint.hidden = false;
-          if (calOptional) calOptional.open = false;
-          hideCalHints();
-        }
         (function baiduCcfCaption() {
           var ccf = window.APRIL_BAIDU_CCF || {};
           var files = Array.isArray(ccf.files) ? ccf.files : [];
