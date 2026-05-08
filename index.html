@@ -31,12 +31,12 @@
       window.APRIL_BOOKING = {
         /**
          * Calendly：填活动链接后，站内用 iframe 嵌入（嵌入参数由脚本自动生成）；与下方 embedUrl 二选一。
-         * 例：https://calendly.com/your-name/30min
+         * 例：https://calendly.com/your-name/let-s-talk
          */
-        calendlyInlineUrl: "https://calendly.com/april-zhao-wustl/30min",
+        calendlyInlineUrl: "https://calendly.com/april-zhao-wustl/let-s-talk",
         /** 选填。通用 iframe 嵌入（非 Calendly 或自托管页）。与 calendlyInlineUrl 二选一。 */
         embedUrl: "",
-        openInNewTabUrl: "https://calendly.com/april-zhao-wustl/30min",
+        openInNewTabUrl: "https://calendly.com/april-zhao-wustl/let-s-talk",
         /**
          * 必填（否则为演示模式）。当前为 Google Apps Script Web 应用「/exec」地址；在地址栏直接打开若提示 doGet 属正常（表单走 POST）。
          * 若改回 FormSubmit：用 https://formsubmit.co/ajax/你的邮箱
@@ -683,20 +683,22 @@
       @keyframes hero-bg-garden-drift {
         0%,
         100% {
-          transform: translateY(-50%) rotate(-90deg) translate3d(0, 0, 0);
+          transform: translateY(-50%) translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg)
+            translate3d(0, 0, 0);
         }
         50% {
-          transform: translateY(-50%) rotate(-90deg) translate3d(0, -8px, 0);
+          transform: translateY(-50%) translateX(var(--hero-garden-drift-x, 0px)) rotate(-90deg)
+            translate3d(0, -8px, 0);
         }
       }
-      /* 左侧留白内完整可见：center 旋转 + 适度 inset，避免 origin:left 把半边甩出视口 */
-      .hero::after {
-        content: "DIGITAL GARDEN";
+      /* 放入首屏栅格内分层：压在肖像之下、主内容与侧栏之上，避免 ::after 整块低于 .wrap */
+      .hero-bg-garden {
+        --hero-garden-drift-x: clamp(-13rem, calc((min(1100px, 92vw) - 100vw) / 4 + max(0.75rem, env(safe-area-inset-left, 0px))), -2rem);
         position: absolute;
-        left: max(1.75rem, calc(env(safe-area-inset-left, 0px) + 1.35rem));
-        right: auto;
-        top: 48%;
-        transform: translateY(-50%) rotate(-90deg);
+        left: 0;
+        top: 42%;
+        z-index: 1;
+        transform: translateY(-50%) translateX(var(--hero-garden-drift-x)) rotate(-90deg);
         transform-origin: center center;
         font-size: clamp(1.55rem, 3.5vw, 2.65rem);
         font-weight: 700;
@@ -704,7 +706,6 @@
         letter-spacing: 0.14em;
         color: color-mix(in srgb, var(--accent) 7%, var(--text) 4%);
         pointer-events: none;
-        z-index: 0;
         font-family: var(--font-display);
         line-height: 1;
         white-space: nowrap;
@@ -712,12 +713,12 @@
         animation: hero-bg-garden-drift 32s ease-in-out infinite;
       }
       @media (prefers-reduced-motion: reduce) {
-        .hero::after {
+        .hero-bg-garden {
           animation: none;
         }
       }
       @media (max-width: 700px) {
-        .hero::after {
+        .hero-bg-garden {
           display: none;
         }
       }
@@ -782,6 +783,14 @@
         padding: 0.42rem 0.68rem;
       }
       .hero .wrap {
+        position: relative;
+      }
+      .wrap.hero__grid--photo .hero__figure {
+        position: relative;
+        z-index: 0;
+      }
+      .hero__main,
+      .wrap.hero__grid--photo .hero__panel {
         position: relative;
         z-index: 2;
       }
@@ -2951,6 +2960,7 @@
         <div class="deco-orb deco-orb--a" aria-hidden="true"></div>
         <div class="deco-orb deco-orb--b" aria-hidden="true"></div>
         <div class="wrap hero__grid hero__grid--photo">
+          <span class="hero-bg-garden" aria-hidden="true">DIGITAL GARDEN</span>
           <figure class="hero__figure">
             <div class="hero__imgbox" aria-label="油画风肖像画框">
               <img
@@ -3123,7 +3133,8 @@
             </div>
             <div class="btn-row">
               <a class="btn btn-primary" href="#coffee"
-                ><span class="i18n-zh">预约 15 分钟交流</span><span class="i18n-en" lang="en">Book 15 min</span></a
+                ><span class="i18n-zh">预约 Let's Talk（10 分钟–1 小时）</span
+                ><span class="i18n-en" lang="en">Book Let's Talk (10 min – 1 hr)</span></a
               >
               <a class="btn btn-ghost" href="#portfolio"
                 ><span class="i18n-zh">探索我的实验</span><span class="i18n-en" lang="en">Explore my experiments</span></a
@@ -4516,7 +4527,7 @@
               <ul class="coffee-booking-intro__list">
                 <li>填下方表单留意向与时间偏好</li>
                 <li>我会按你选的会议方式回信 / 链</li>
-                <li>也可下滑用<strong>自助预约</strong>直接锁时段</li>
+                <li>也可下滑用<strong>自助预约</strong>直接锁时段（Calendly 单次时长可按需在<strong>约 10 分钟–1 小时</strong>内选择）</li>
               </ul>
               <p class="sub coffee-demo-note" id="coffeeDemoNoteZh" hidden>
                 <strong>注：</strong>当前为演示状态，提交仅作测试，不会发送真实邮件。
@@ -4532,7 +4543,7 @@
               <ul class="coffee-booking-intro__list">
                 <li>Use the quick form below for intent + timing prefs.</li>
                 <li>I’ll reply with meeting details via your preferred tool.</li>
-                <li>Or scroll down to <strong>self-book</strong> when that’s enabled.</li>
+                <li>Or scroll down to <strong>self-book</strong>—Calendly slots are commonly <strong>10 minutes up to 1 hour</strong>.</li>
               </ul>
               <p class="sub coffee-demo-note" id="coffeeDemoNoteEn" hidden>
                 <strong>Note:</strong> Demo mode—submits aren’t emailed yet.
@@ -4695,7 +4706,7 @@
                     color: var(--text-muted);
                     margin-top: 0.3rem;
                   "
-                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）</span
+                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）；单次时长在页内自选约 10 分钟–1 小时</span
                 ></span
               >
               <span class="i18n-en" lang="en"
@@ -4707,7 +4718,7 @@
                     color: var(--text-muted);
                     margin-top: 0.3rem;
                   "
-                  >Open slots inline or in a tab—calendar sync when connected.</span
+                  >Open slots inline or in a tab—pick about <strong>10 min to 1 hr</strong> per meeting when offered.</span
                 ></span
               >
             </summary>
@@ -4730,7 +4741,7 @@
                 <iframe
                   id="booking-iframe"
                   class="booking-live-iframe"
-                  title="Book a time — Coffee chat"
+                  title="Let's Talk — pick about 10 min to 1 hr"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                   allow="camera; microphone; fullscreen; payment"
@@ -4755,10 +4766,10 @@
                 ><span class="i18n-en" lang="en">Complete booking in a new tab</span>
               </h3>
               <p class="sub i18n-zh" style="margin-top: 0; margin-bottom: 1rem">
-                已指向预约页。选好时段后，由平台跟进邮件与日历邀请（接了 Zoom 会一并带出）。
+                已指向 Let's Talk 预约页；时长可在<strong>约 10 分钟–1 小时</strong>内自选（以 Calendly 页面为准）。选好时段后由平台发邮件与日历邀请（接了 Zoom 会一并带出）。
               </p>
               <p class="sub i18n-en" style="margin-top: 0; margin-bottom: 1rem" lang="en">
-                Booking link is live—the app sends slots, emails, calendar, and Zoom if linked.
+                Opens the <strong>Let&apos;s Talk</strong> page—choose roughly <strong>10 minutes up to 1 hour</strong> when Calendly offers those durations. Confirmations, calendar, and Zoom flow through the app when linked.
               </p>
               <a
                 class="btn btn-primary"
@@ -5366,14 +5377,14 @@
           if (calHintZh) {
             calHintZh.hidden = false;
             calHintZh.textContent = formSubmitUrl
-              ? "下方已内嵌日历，可直接选时段；上方表单也会投递到我邮箱，可搭配使用。"
-              : "下方已内嵌日历，可直接点选可约时间。";
+              ? "下方已内嵌 Let's Talk 日历，可直接选时段（单次时长约 10 分钟–1 小时，以 Calendly 为准）；上方表单也会投递到我邮箱，可搭配使用。"
+              : "下方已内嵌 Let's Talk 日历，可直接点选可约时间（时长约 10 分钟–1 小时）。";
           }
           if (calHintEn) {
             calHintEn.hidden = false;
             calHintEn.textContent = formSubmitUrl
-              ? "Calendar is embedded below; the form also reaches my inbox when enabled—use either or both."
-              : "Calendar is embedded below—pick an open slot.";
+              ? "Let's Talk calendar is embedded—pick a slot (often ~10 min–1 hr per Calendly); the form also reaches my inbox when enabled."
+              : "Embedded Let's Talk calendar—choose about 10 minutes up to 1 hour when offered.";
           }
           if (timeBoxLine1z) {
             timeBoxLine1z.innerHTML = "<strong>可沟通时间（与日历展示一致）</strong>";
@@ -5407,14 +5418,14 @@
           if (calHintZh) {
             calHintZh.hidden = false;
             calHintZh.textContent = formSubmitUrl
-              ? "下方按钮可打开预约页选时段；上方表单亦会发到邮箱，可搭配使用。"
-              : "下方按钮可打开预约页，查看可约时间。";
+              ? "下方按钮可打开 Let's Talk 预约页选时段（单次时长约 10 分钟–1 小时，以 Calendly 为准）；上方表单亦会发到邮箱，可搭配使用。"
+              : "下方按钮可打开 Let's Talk 预约页，查看可约时间与时长选项。";
           }
           if (calHintEn) {
             calHintEn.hidden = false;
             calHintEn.textContent = formSubmitUrl
-              ? "Use the button below for an external booking page; the form also posts when enabled."
-              : "Use the button below to open booking in a new tab.";
+              ? "Use the Let's Talk link below for booking (~10 min–1 hr per Calendly); the form also posts when enabled."
+              : "Open Let's Talk in a new tab to pick duration and time.";
           }
           if (calOptional) calOptional.open = true;
         } else {
