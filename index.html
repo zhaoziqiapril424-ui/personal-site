@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN"> 
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,32 +23,18 @@
     />
     <script>
       /**
-       * 主流程：把 formSubmitUrl 设为收件端点 → 访客提交后发到你邮箱；你再在 Outlook 里约 Zoom/腾讯会议并通过邮件回链（静态页无法在访客浏览器里替你建会）。
-       * FormSubmit：首次须在 URL 里的主邮箱收信并点击「激活表单」。
-       * Google Apps Script：把 formSubmitUrl 换成 `https://script.google.com/macros/s/…/exec`（见文件内说明）；与 FormSubmit 互斥，二选一。
-       * 可选：calendlyInlineUrl — Calendly 活动页链接（站内用 iframe 嵌入）；embedUrl — 任意可 iframe 嵌入的预订页。
+       * 主流程（推荐）：在 Formspree / 金数据等建表单，把 POST 端点填到 formSubmitUrl → 访客提交后邮件到你邮箱；你再在
+       * Outlook 里用 Zoom/腾讯会议 创建会议，通过邮件发链接（静态页无法代你本机建会）。
+       * 可选：Cal.com / Calendly 的 embedUrl — 在对方后台接好 Zoom/Teams/Outlook 后，对方可「自助选时」并自动出日历+会议，与表单二选一或并存。
        */
       window.APRIL_BOOKING = {
-        /**
-         * Calendly：填活动链接后，站内用 iframe 嵌入（嵌入参数由脚本自动生成）；与下方 embedUrl 二选一。
-         * 例：https://calendly.com/your-name/30min
-         */
-        calendlyInlineUrl: "https://calendly.com/april-zhao-wustl/30min",
-        /** 选填。通用 iframe 嵌入（非 Calendly 或自托管页）。与 calendlyInlineUrl 二选一。 */
+        /** 选填。填后页面内会展开「自助选时」区并显示 iframe 或新窗口链接。 */
         embedUrl: "",
-        openInNewTabUrl: "https://calendly.com/april-zhao-wustl/30min",
+        openInNewTabUrl: "",
         /**
-         * 必填（否则为演示模式）。当前为 Google Apps Script Web 应用「/exec」地址；在地址栏直接打开若提示 doGet 属正常（表单走 POST）。
-         * 若改回 FormSubmit：用 https://formsubmit.co/ajax/你的邮箱
+         * 主流程必配（否则提交仅为浏览器演示）。Formspree 例：https://formspree.io/f/xxxxxx — 把邮件收到 april.zhao@wustl.edu 等你绑定的箱。
          */
-        formSubmitUrl:
-          "https://script.google.com/macros/s/AKfycbx-51b1R800zRDx9zMZs9bSWEc8VmpfR499aGdcfAunFPa9IYI6JtUaNATfIgxvqeMc/exec",
-        /**
-         * 可选：与 Google Apps Script 约定同一串乱码，写入脚本「项目属性」里，略防机器人乱 POST（可不填）。
-         */
-        googleAppsScriptFormSecret: "",
-        /** FormSubmit / GAS：抄送信箱。留空则不抄送（GAS 端须发信时带 CC） */
-        formSubmitCc: "april.zhao@wustl.edu",
+        formSubmitUrl: "",
         /** 邮件主题（Formspree 的 _subject 等会带上访客填写的日期/会议方式等字段一起发到正文） */
         formEmailSubject: "个人站：预约对谈 - Coffee chat",
       };
@@ -204,16 +190,6 @@
       .section--line-top {
         border-top: 1px solid var(--border);
       }
-      #about {
-        position: relative;
-        overflow-x: clip;
-        overflow-y: visible;
-      }
-      @supports not (overflow: clip) {
-        #about {
-          overflow-x: hidden;
-        }
-      }
       .marquee-ribbon {
         overflow: hidden;
         border-top: 1px solid var(--border);
@@ -279,15 +255,10 @@
         }
       }
       .bento-metric__cell {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 5.5rem;
         background: color-mix(in srgb, var(--bg-elevated) 92%, var(--accent));
         border: 1px solid var(--border);
         border-radius: var(--radius-sm);
-        padding: 0.75rem 0.7rem;
+        padding: 0.7rem 0.8rem;
         text-align: center;
         box-shadow: 0 4px 20px -8px color-mix(in srgb, var(--text) 20%, transparent);
         transition: transform 0.2s, box-shadow 0.2s;
@@ -298,12 +269,12 @@
       }
       .bento-metric__num {
         display: block;
-        font-size: 1.28rem;
+        font-size: 1.35rem;
         font-weight: 800;
         font-variant-numeric: tabular-nums;
         color: var(--accent);
         letter-spacing: -0.04em;
-        line-height: 1.12;
+        line-height: 1.1;
         font-family: var(--font-display);
       }
       [data-theme="dark"] .bento-metric__num {
@@ -314,24 +285,17 @@
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: var(--text-muted);
-        margin-top: 0.35rem;
-        line-height: 1.35;
-        margin-left: auto;
-        margin-right: auto;
+        margin-top: 0.2rem;
+        line-height: 1.3;
       }
       .bento-metric__label.i18n-zh {
         text-transform: none;
         letter-spacing: 0.02em;
-        font-size: 0.78rem;
-        font-weight: 500;
-        line-height: 1.45;
+        font-size: 0.64rem;
+        line-height: 1.4;
         display: block;
-        max-width: 11.5em;
-        margin-left: auto;
-        margin-right: auto;
-        text-wrap: balance;
-        hyphens: none;
-        word-break: keep-all;
+        hyphens: auto;
+        word-break: break-word;
       }
       .deco-orb {
         position: absolute;
@@ -384,39 +348,6 @@
         font-weight: 500;
         line-height: 1.4;
         font-family: var(--font-display);
-      }
-      .hero__role {
-        margin: 0.35rem 0 0.25rem;
-        font-size: clamp(1rem, 2.05vw, 1.14rem);
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        color: var(--text);
-        line-height: 1.35;
-      }
-      .hero__slogan {
-        margin: 0 0 0.4rem;
-        font-size: clamp(0.93rem, 1.85vw, 1.02rem);
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: color-mix(in srgb, var(--accent-2) 50%, var(--text));
-        max-width: 40rem;
-        line-height: 1.45;
-      }
-      .hero__lede {
-        margin: 0 0 0.95rem;
-        font-size: 0.82rem;
-        line-height: 1.55;
-        color: var(--text-muted);
-        max-width: 38rem;
-      }
-      .hero__main .btn-row .btn-primary {
-        padding: 0.82rem 1.6rem;
-        font-size: 1rem;
-      }
-      .hero__main .btn-row .btn-ghost {
-        padding: 0.7rem 1.2rem;
-        font-size: 0.9rem;
-        opacity: 0.92;
       }
       a {
         color: var(--accent);
@@ -532,7 +463,6 @@
         justify-content: center;
         width: 42px;
         height: 42px;
-        margin-inline-start: 0.2rem;
         border: 1px solid var(--border);
         border-radius: 10px;
         background: var(--bg-elevated);
@@ -547,39 +477,34 @@
       .nav-actions {
         display: flex;
         align-items: center;
-        gap: 0.35rem;
+        gap: 0.4rem;
         flex-wrap: wrap;
         justify-content: flex-end;
-      }
-      .nav-actions__divider {
-        width: 1px;
-        height: 1.35rem;
-        margin: 0 0.1rem;
-        flex-shrink: 0;
-        background: color-mix(in srgb, var(--border) 85%, transparent);
-        opacity: 0.9;
-        align-self: center;
-      }
-      @media (max-width: 420px) {
-        .nav-actions__divider {
-          display: none;
-        }
       }
       .nav-translate-wrap {
         position: relative;
         z-index: 120;
         display: flex;
-        align-items: center;
-        gap: 0;
-        max-width: min(160px, 38vw);
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.1rem;
+        max-width: min(200px, 40vw);
+      }
+      .nav-translate-wrap .nav-translate-label {
+        font-size: 0.6rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        line-height: 1;
+        margin: 0;
       }
       #google_translate_element {
-        height: 42px;
-        min-height: 42px;
+        min-height: 40px;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         line-height: 1.2;
       }
       #google_translate_element .goog-te-gadget {
@@ -588,17 +513,10 @@
         font-family: var(--font-sans) !important;
       }
       #google_translate_element .goog-te-gadget-simple {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-height: 42px !important;
-        height: 42px !important;
-        max-height: 42px !important;
-        padding: 0 0.5rem !important;
-        box-sizing: border-box !important;
         background: var(--bg-elevated) !important;
         border: 1px solid var(--border) !important;
         border-radius: 10px !important;
+        padding: 0.2rem 0.35rem !important;
       }
       #google_translate_element img {
         display: none !important;
@@ -680,22 +598,25 @@
         overflow: hidden;
       }
       .hero::after {
-        content: "PORTFOLIO";
+        content: "CONNECT";
         position: absolute;
-        right: 3%;
-        top: 48%;
+        right: clamp(0.75rem, 3vw, 2rem);
+        top: 50%;
         transform: translateY(-50%) rotate(-90deg);
-        font-size: clamp(3rem, 10vw, 5.2rem);
+        font-size: clamp(2.4rem, 7.5vw, 4rem);
         font-weight: 700;
         font-style: italic;
-        letter-spacing: 0.12em;
-        color: color-mix(in srgb, var(--accent) 7%, var(--text) 4%);
+        letter-spacing: 0.14em;
+        color: color-mix(in srgb, var(--text-muted) 38%, transparent);
         pointer-events: none;
-        z-index: 0;
+        z-index: 4;
         font-family: var(--font-display);
         line-height: 1;
         white-space: nowrap;
         user-select: none;
+      }
+      [data-theme="dark"] .hero::after {
+        color: color-mix(in srgb, var(--text-muted) 28%, transparent);
       }
       @media (max-width: 700px) {
         .hero::after {
@@ -752,11 +673,6 @@
         border: 1px solid var(--border);
         color: var(--text);
         font-weight: 500;
-      }
-      .hero__chip--lead {
-        font-size: 0.78rem;
-        line-height: 1.38;
-        padding: 0.42rem 0.68rem;
       }
       .hero .wrap {
         position: relative;
@@ -875,34 +791,20 @@
         font-size: 0.95rem;
         color: var(--text-muted);
         font-style: italic;
-        margin: 0.35rem auto 1.05rem;
-        max-width: 28rem;
-        line-height: 1.55;
+        margin: 0.25rem 0 0.9rem;
+        max-width: 40rem;
+        line-height: 1.5;
         font-weight: 500;
       }
-      .site-footer__contact {
-        margin: 0 auto;
-        font-size: 0.88rem;
-        line-height: 1.7;
+      .site-footer__colophon {
+        font-size: 0.72rem;
         color: var(--text-muted);
-        max-width: 36rem;
+        margin: 0.6rem 0 0;
+        line-height: 1.45;
+        opacity: 0.88;
       }
-      .site-footer__contact p {
-        margin: 0.15rem 0;
-      }
-      .site-footer__contact a {
-        color: var(--text);
-        text-decoration: none;
-        border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
-        transition: border-color 0.15s, color 0.15s;
-      }
-      .site-footer__contact a:hover {
-        border-bottom-color: color-mix(in srgb, var(--accent) 70%, var(--text));
-      }
-      .site-footer__sep {
-        margin: 0 0.4em;
-        opacity: 0.4;
-        font-weight: 300;
+      .site-footer__colophon code {
+        font-size: 0.85em;
       }
       .btn-row {
         display: flex;
@@ -1036,27 +938,6 @@
       details.card summary:hover {
         background: var(--accent-soft);
       }
-      .card-summary__lead {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-        min-width: 0;
-        flex: 1;
-      }
-      .edu-brand-icon {
-        flex-shrink: 0;
-        width: 2.6rem;
-        height: 2.6rem;
-        display: grid;
-        place-items: center;
-        background: transparent;
-      }
-      .edu-brand-icon img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        filter: saturate(0.88);
-      }
       .card-body {
         padding: 0 1.35rem 1.2rem;
         color: var(--text-muted);
@@ -1083,20 +964,6 @@
         padding: 0.2rem 0.45rem;
         border-radius: 6px;
         font-weight: 600;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      .intern-block .stat:hover {
-        transform: scale(1.05);
-        box-shadow: 0 2px 10px -4px color-mix(in srgb, var(--accent-2) 35%, transparent);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .stat {
-          transition: none;
-        }
-        .intern-block .stat:hover {
-          transform: none;
-          box-shadow: none;
-        }
       }
       .intern-block {
         border: 1px solid var(--border);
@@ -1268,17 +1135,15 @@
         outline-offset: 3px;
       }
       .intern-body__photo-wrap {
-        border-radius: var(--radius);
+        border-radius: var(--radius-sm);
         overflow: hidden;
-        border: 1px solid color-mix(in srgb, var(--border) 48%, transparent);
+        border: 1px solid var(--border);
         background: var(--bg-alt);
-        box-shadow: 0 0 0 1px color-mix(in srgb, #fff 55%, transparent) inset;
       }
       .intern-body__photo-wrap img {
         display: block;
         width: 100%;
         height: auto;
-        border-radius: calc(var(--radius) - 2px);
       }
       .intern-body__photo-missing {
         font-size: 0.75rem;
@@ -1370,7 +1235,8 @@
       #proj-schnucks,
       #proj-olin-orientation,
       #proj-partydip,
-      #proj-tcfl {
+      #proj-tcfl,
+      #proj-must-grad-2020 {
         scroll-margin-top: calc(var(--nav-h) + 1rem);
       }
       .skill-cols {
@@ -1389,29 +1255,11 @@
         color: var(--text-muted);
         margin: 0 0 0.5rem;
       }
-      .skill-card-h {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.42rem;
-      }
-      .skill-card__icon {
-        display: inline-block;
-        font-size: 0.95rem;
-        line-height: 1.35;
-        opacity: 0.72;
-        flex-shrink: 0;
-        filter: saturate(0.88);
-        user-select: none;
-      }
       .tag-cloud {
         display: flex;
         flex-wrap: wrap;
         gap: 0.4rem;
         margin-bottom: 0.75rem;
-      }
-      #skills {
-        --skill-bar-a: color-mix(in srgb, var(--accent-2) 88%, #c9a86c);
-        --skill-bar-b: color-mix(in srgb, var(--accent) 85%, #e8d5b0);
       }
       .tag {
         font-size: 0.82rem;
@@ -1419,19 +1267,6 @@
         border-radius: 6px;
         background: var(--bg);
         border: 1px solid var(--border);
-      }
-      #skills .tag.tag--focus {
-        font-weight: 650;
-        color: color-mix(in srgb, var(--text) 82%, var(--accent-2));
-        border-color: color-mix(in srgb, var(--skill-bar-a) 55%, var(--border));
-        border-left: 3px solid var(--skill-bar-a);
-        padding-left: 0.42rem;
-        background: linear-gradient(
-          120deg,
-          color-mix(in srgb, var(--skill-bar-a) 22%, var(--bg)) 0%,
-          color-mix(in srgb, var(--skill-bar-b) 14%, var(--bg)) 100%
-        );
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--skill-bar-b) 15%, transparent) inset;
       }
       .meter {
         margin-bottom: 0.5rem;
@@ -1450,7 +1285,7 @@
       .meter .fill {
         height: 100%;
         border-radius: 999px;
-        background: linear-gradient(90deg, var(--skill-bar-a), var(--skill-bar-b));
+        background: linear-gradient(90deg, #a855f7, var(--accent));
       }
       .port-grid {
         display: grid;
@@ -1491,36 +1326,6 @@
       .port-item h3 {
         margin: 0 0 0.2rem;
         font-size: 0.98rem;
-      }
-      .port-item__head {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 0.45rem 0.55rem;
-        margin-bottom: 0.2rem;
-      }
-      .port-item__head h3 {
-        margin: 0;
-        flex: 1 1 10rem;
-        font-size: 0.98rem;
-      }
-      .port-kpi {
-        display: inline-block;
-        font-size: 0.72rem;
-        font-weight: 650;
-        letter-spacing: 0.03em;
-        padding: 0.14rem 0.5rem;
-        border-radius: 999px;
-        line-height: 1.35;
-        flex-shrink: 0;
-        background: color-mix(in srgb, var(--accent-soft) 72%, var(--bg));
-        border: 1px solid color-mix(in srgb, var(--accent-2) 32%, var(--border));
-        color: color-mix(in srgb, var(--text) 78%, var(--accent-2));
-        box-shadow: 0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset;
-      }
-      [data-theme="dark"] .port-kpi {
-        box-shadow: none;
-        border-color: color-mix(in srgb, var(--accent-2) 40%, var(--border));
       }
       .port-item p {
         margin: 0;
@@ -1579,7 +1384,7 @@
       .field textarea {
         width: 100%;
         padding: 0.65rem 0.8rem;
-        border-radius: var(--radius-sm);
+        border-radius: 10px;
         border: 1px solid var(--border);
         background: var(--bg-elevated);
         color: var(--text);
@@ -1599,71 +1404,6 @@
       }
       .form .btn {
         width: fit-content;
-      }
-      .field label .field-req {
-        color: color-mix(in srgb, var(--accent-2) 82%, var(--text));
-        font-weight: 700;
-        margin-left: 0.1em;
-        text-decoration: none;
-      }
-      .coffee-intro-block {
-        max-width: 36rem;
-        margin-bottom: 1.25rem;
-      }
-      body[data-locale="zh"] .coffee-intro-block.i18n-zh {
-        max-width: min(92vw, 52rem);
-      }
-      .coffee-intro-block p.sub {
-        margin: 0 0 0.65rem;
-        line-height: 1.62;
-      }
-      .coffee-intro-block p.sub.coffee-intro-zh-one-line {
-        white-space: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        max-width: 100%;
-        -webkit-overflow-scrolling: touch;
-      }
-      .coffee-booking-intro__ttl {
-        margin: 0 0 0.35rem;
-      }
-      .coffee-booking-intro__list {
-        margin: 0 0 0.85rem;
-        padding-left: 1.25rem;
-        color: var(--text-muted);
-        line-height: 1.62;
-      }
-      .coffee-booking-intro__list li {
-        margin: 0.35rem 0;
-      }
-      .coffee-demo-note {
-        margin: 0.75rem 0 0 !important;
-        font-size: 0.88rem !important;
-        color: var(--accent-2) !important;
-      }
-      .coffee-cal-hint {
-        margin: 0.65rem 0 0 !important;
-        padding: 0.55rem 0.72rem !important;
-        border-radius: var(--radius-sm);
-        border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-        background: color-mix(in srgb, var(--accent-soft) 45%, var(--bg-elevated));
-        font-size: 0.88rem !important;
-        color: var(--text-muted) !important;
-      }
-      .coffee-form-shell {
-        max-width: 32rem;
-        background: var(--bg-elevated);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1.25rem 1.3rem;
-        margin-bottom: 1.5rem;
-        box-sizing: border-box;
-      }
-      .coffee-booking-form.form {
-        max-width: none;
-      }
-      .coffee-booking-form {
-        gap: 1rem;
       }
       .booking-hint {
         background: var(--bg-elevated);
@@ -1700,21 +1440,17 @@
       }
       .booking-iframe-wrap {
         width: 100%;
-        max-width: 640px;
-        margin: 0 auto;
+        min-height: 640px;
         border: 1px solid var(--border);
         border-radius: var(--radius);
         overflow: hidden;
         background: var(--bg-elevated);
         box-shadow: var(--shadow);
-        line-height: 0;
       }
-      /* Calendly 需足够高度展示 Cookie + 日历；不要用过小 vh（曾导致只看得见 Cookie 一栏） */
-      .booking-iframe-wrap iframe.booking-live-iframe {
+      .booking-iframe-wrap iframe {
         display: block;
         width: 100%;
-        height: clamp(460px, 62vh, 640px);
-        min-height: 460px;
+        min-height: 640px;
         border: 0;
       }
       .booking-embed-foot {
@@ -1734,7 +1470,7 @@
         margin-bottom: 0.75rem;
       }
       .site-footer {
-        padding: 3.25rem 0 2.75rem;
+        padding: 3.25rem 0 2.5rem;
         color: var(--text-muted);
         font-size: 0.9rem;
         text-align: center;
@@ -1747,43 +1483,29 @@
         font-size: 1.15rem;
         letter-spacing: 0.1em;
         font-family: var(--font-display);
-        margin: 0 0 0.35rem;
+        margin: 0 0 0.5rem;
       }
       .site-footer__social {
-        margin: 1.4rem auto 0;
-        max-width: 28rem;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
+        line-height: 1.7;
+        max-width: 32rem;
+        margin: 1rem auto 0;
+        opacity: 0.9;
       }
-      .site-footer__social-row {
-        display: flex;
+      .site-footer__social span {
+        display: inline-block;
+        margin: 0 0.35rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 6px;
+        background: color-mix(in srgb, var(--accent-soft) 80%, var(--bg-elevated));
+        border: 1px solid var(--border);
+      }
+      .site-footer__social .site-footer__social-row {
+        display: inline-flex;
         flex-wrap: wrap;
-        gap: 0;
+        gap: 0.45rem 0.7rem;
         align-items: center;
         justify-content: center;
-        margin: 0;
-      }
-      .site-footer__social-row a {
-        color: var(--text-muted);
-        text-decoration: none;
-        transition: color 0.15s;
-      }
-      .site-footer__social-row a:hover {
-        color: var(--text);
-      }
-      .site-footer__link-sep {
-        margin: 0 0.55em;
-        color: var(--text-muted);
-        opacity: 0.45;
-        user-select: none;
-        pointer-events: none;
-      }
-      .site-footer__copyright {
-        margin: 1.85rem 0 0;
-        font-size: 0.76rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-muted);
-        opacity: 0.72;
       }
       .modal-backdrop {
         position: fixed;
@@ -2016,189 +1738,125 @@
       .wrap--about {
         width: min(1180px, 95vw);
         position: relative;
-        z-index: 1;
       }
       .about-paint-decor {
         position: absolute;
         left: 0;
         right: 0;
-        top: -0.75rem;
-        height: clamp(21rem, 52vw, 40rem);
+        top: 0;
+        height: clamp(19rem, 48vw, 36rem);
         pointer-events: none;
         z-index: 0;
-        overflow: visible;
-      }
-      .about-paint-decor__layer {
-        position: absolute;
-        inset: -5rem -14vw -3rem -14vw;
-        filter: url(#about-oil-impasto);
-        transform: translateZ(0);
-      }
-      .about-paint-decor__wash {
-        position: absolute;
-        inset: -18% -8% -5% -8%;
-        background:
-          radial-gradient(
-            ellipse 85% 70% at 78% 8%,
-            color-mix(in srgb, #d4bc98 42%, transparent) 0%,
-            color-mix(in srgb, #c9aa88 22%, transparent) 28%,
-            transparent 62%
-          ),
-          radial-gradient(
-            ellipse 70% 55% at 12% 18%,
-            color-mix(in srgb, #e8d4b8 38%, transparent) 0%,
-            transparent 58%
-          ),
-          radial-gradient(ellipse 60% 45% at 55% 45%, color-mix(in srgb, #cfd6dd 26%, transparent) 0%, transparent 65%);
-        filter: blur(46px);
-        mix-blend-mode: soft-light;
-        opacity: 0.92;
+        overflow: hidden;
       }
       .about-paint-decor__blob {
         position: absolute;
         border-radius: 58% 42% 68% 32% / 45% 55% 35% 65%;
-        filter: blur(42px);
-        mix-blend-mode: soft-light;
-        opacity: 0.5;
+        filter: blur(26px);
+        mix-blend-mode: multiply;
+        opacity: 0.4;
+        will-change: filter;
       }
       .about-paint-decor__blob--a {
-        width: min(24rem, 62vw);
-        height: min(26rem, 50vw);
-        top: -4%;
-        left: -22%;
+        width: min(20rem, 55vw);
+        height: min(22rem, 42vw);
+        top: 2%;
+        left: -7%;
         background: radial-gradient(
-          ellipse 90% 88% at 42% 40%,
-          color-mix(in srgb, #c9a075 52%, transparent) 0%,
-          color-mix(in srgb, #d9c4a8 18%, transparent) 38%,
-          transparent 74%
+          ellipse 80% 72% at 38% 42%,
+          color-mix(in srgb, #c08e62 75%, #ead8c0) 0%,
+          color-mix(in srgb, #b8a08a 45%, #e5dac8) 45%,
+          transparent 70%
         );
-        transform: rotate(-16deg) scale(1.05);
+        transform: rotate(-14deg) scale(1.02);
       }
       .about-paint-decor__blob--b {
-        width: min(30rem, 78vw);
-        height: min(22rem, 44vw);
-        top: -2%;
-        right: -26%;
+        width: min(24rem, 60vw);
+        height: min(16rem, 32vw);
+        top: 14%;
+        right: -9%;
         background: radial-gradient(
-          ellipse 95% 90% at 58% 38%,
-          color-mix(in srgb, #9aaab8 32%, transparent) 0%,
-          color-mix(in srgb, #aeb8bf 14%, transparent) 36%,
-          transparent 76%
+          ellipse 75% 68% at 55% 48%,
+          color-mix(in srgb, #6d7d8c 50%, #a8b4c0) 0%,
+          color-mix(in srgb, #8a9eac 35%, #d0c8b8) 48%,
+          transparent 72%
         );
-        transform: rotate(11deg) scale(1.08);
-        border-radius: 48% 52% 64% 36% / 42% 38% 62% 58%;
-        opacity: 0.38;
-      }
-      .about-paint-decor__blob--c {
-        width: min(18rem, 48vw);
-        height: min(15rem, 36vw);
-        top: 28%;
-        left: 18%;
-        background: radial-gradient(
-          ellipse 88% 85% at 50% 45%,
-          color-mix(in srgb, #ddb882 44%, transparent) 0%,
-          color-mix(in srgb, #eecf9a 14%, transparent) 42%,
-          transparent 80%
-        );
-        transform: rotate(22deg) scale(1);
-        border-radius: 62% 38% 48% 52% / 55% 60% 40% 45%;
+        transform: rotate(10deg) scale(1.05);
         opacity: 0.32;
       }
-      .about-paint-decor__smear {
-        position: absolute;
-        mix-blend-mode: soft-light;
-        opacity: 0.55;
-        filter: blur(22px);
-        pointer-events: none;
-      }
-      .about-paint-decor__smear--1 {
-        width: min(52%, 34rem);
-        height: min(92%, 30rem);
-        top: -12%;
-        right: -18%;
-        transform: rotate(-22deg) skewX(-6deg);
-        border-radius: 32% 68% 78% 22% / 55% 35% 65% 45%;
-        background: linear-gradient(
-          148deg,
-          transparent 18%,
-          color-mix(in srgb, #a89682 38%, transparent) 42%,
-          color-mix(in srgb, #c6a574 22%, transparent) 58%,
-          transparent 78%
-        );
-      }
-      .about-paint-decor__smear--2 {
-        width: min(40%, 22rem);
-        height: min(48%, 16rem);
-        top: 8%;
-        right: -6%;
-        transform: rotate(12deg) skewX(4deg);
-        border-radius: 72% 28% 40% 60% / 48% 55% 45% 52%;
+      .about-paint-decor__blob--c {
+        width: min(14rem, 40vw);
+        height: min(12rem, 28vw);
+        top: 38%;
+        left: 32%;
         background: radial-gradient(
-          ellipse 100% 80% at 60% 40%,
-          color-mix(in srgb, #dde3e8 35%, transparent) 0%,
-          color-mix(in srgb, #b8956e 26%, transparent) 45%,
-          transparent 68%
+          ellipse 70% 65% at 50% 50%,
+          color-mix(in srgb, #c9a86c 60%, #f2e0b8) 0%,
+          color-mix(in srgb, #d4a84b 28%, #e5dac8) 55%,
+          transparent 75%
         );
-        opacity: 0.42;
+        transform: rotate(24deg) scale(0.95);
+        border-radius: 45% 55% 40% 60% / 50% 45% 55% 50%;
+        opacity: 0.28;
       }
-      [data-theme="dark"] .about-paint-decor__layer {
-        filter: url(#about-oil-impasto) saturate(0.85);
-      }
-      [data-theme="dark"] .about-paint-decor__wash {
-        opacity: 0.45;
-        filter: blur(52px);
-        mix-blend-mode: screen;
-        background:
-          radial-gradient(
-            ellipse 85% 70% at 78% 8%,
-            color-mix(in srgb, var(--accent-2) 36%, transparent) 0%,
-            transparent 55%
-          ),
-          radial-gradient(ellipse 60% 50% at 15% 20%, color-mix(in srgb, #c4a574 28%, transparent) 0%, transparent 58%);
+      .about-paint-decor__stroke {
+        position: absolute;
+        bottom: 6%;
+        left: 5%;
+        right: 5%;
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          color-mix(in srgb, #a67c00 40%, #8b9aad) 18%,
+          color-mix(in srgb, #2f4f4f 25%, #c9a86c) 52%,
+          color-mix(in srgb, #b8a08a 35%, transparent) 85%,
+          transparent 100%
+        );
+        opacity: 0.28;
+        filter: blur(0.6px);
+        mix-blend-mode: multiply;
       }
       [data-theme="dark"] .about-paint-decor__blob {
-        mix-blend-mode: screen;
-        opacity: 0.22;
-        filter: blur(50px);
+        mix-blend-mode: soft-light;
+        opacity: 0.16;
+        filter: blur(34px);
       }
       [data-theme="dark"] .about-paint-decor__blob--b {
-        opacity: 0.18;
+        opacity: 0.14;
       }
       [data-theme="dark"] .about-paint-decor__blob--c {
-        opacity: 0.16;
+        opacity: 0.12;
       }
-      [data-theme="dark"] .about-paint-decor__smear {
+      [data-theme="dark"] .about-paint-decor__stroke {
         mix-blend-mode: screen;
-        opacity: 0.28;
+        opacity: 0.2;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          color-mix(in srgb, var(--accent-2) 50%, #6b5a3a) 30%,
+          color-mix(in srgb, var(--accent) 40%, #5a4a32) 70%,
+          transparent 100%
+        );
       }
       @media (max-width: 640px) {
         .about-paint-decor {
-          height: clamp(23rem, 78vw, 34rem);
-        }
-        .about-paint-decor__layer {
-          inset: -4rem -20vw -2rem -20vw;
+          height: clamp(22rem, 72vw, 30rem);
         }
         .about-paint-decor__blob--a {
-          left: -28%;
+          left: -12%;
         }
         .about-paint-decor__blob--b {
-          right: -32%;
-          top: 2%;
+          right: -14%;
         }
         .about-paint-decor__blob--c {
-          left: 8%;
-          top: 36%;
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .about-paint-decor__layer {
-          filter: none;
+          left: 20%;
         }
       }
       @media (prefers-contrast: more) {
-        .about-paint-decor__layer {
-          filter: none;
-          opacity: 0.42;
+        .about-paint-decor {
+          opacity: 0.35;
         }
       }
       .about-timeline-eyebrow {
@@ -2241,8 +1899,7 @@
       .wrap--about > .about-stage,
       .wrap--about > h3,
       .wrap--about > .about-cv-block,
-      .wrap--about > .about-film-wrap,
-      .wrap--about > .grid-tags {
+      .wrap--about > .about-film-wrap {
         position: relative;
         z-index: 1;
       }
@@ -2376,53 +2033,6 @@
         margin: 0.5rem auto 0;
         max-width: min(60rem, 100%);
       }
-      .about-tl-cluster {
-        margin: 0.2rem 0 0;
-      }
-      .about-tl-cluster:first-child {
-        margin-top: 0;
-      }
-      .about-tl-cluster + .about-tl-cluster {
-        margin-top: 1.5rem;
-      }
-      .about-tl-cluster__label {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.32rem;
-        margin: 0 0 0.48rem;
-        padding-left: 0.85rem;
-        line-height: 1.35;
-        font-family: var(--font-display);
-        color: color-mix(in srgb, var(--text) 88%, var(--text-muted));
-      }
-      .about-tl-cluster__lead {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 0.45rem 0.65rem;
-        font-size: clamp(0.88rem, 1.85vw, 1.02rem);
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        color: var(--text);
-      }
-      .about-tl-cluster__range {
-        font-variant-numeric: tabular-nums;
-        letter-spacing: 0.04em;
-        color: color-mix(in srgb, var(--text) 92%, var(--accent-2));
-      }
-      .about-tl-cluster__topic {
-        font-weight: 700;
-        letter-spacing: 0.08em;
-      }
-      .about-tl-cluster__sub {
-        font-size: clamp(0.78rem, 1.45vw, 0.88rem);
-        font-weight: 500;
-        letter-spacing: 0.05em;
-        line-height: 1.5;
-        color: color-mix(in srgb, var(--text-muted) 38%, var(--text));
-        max-width: 36rem;
-      }
       .about-tl-flow {
         list-style: none;
         margin: 0.35rem 0 0;
@@ -2430,9 +2040,6 @@
         border-left: none;
         text-align: start;
         position: relative;
-      }
-      .about-tl-cluster .about-tl-flow {
-        margin-top: 0.2rem;
       }
       .about-tl-flow::before {
         content: "";
@@ -2463,51 +2070,8 @@
       }
       .about-tl-flow__item {
         position: relative;
-        margin: 0 0 0.4rem;
-        padding: 0.2rem 0.35rem 0.22rem 0.7rem;
-        border-radius: 10px;
-      }
-      .about-tl-flow__item[data-tl-kind="edu"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, #c9a86c 20%, transparent) 0%,
-          transparent min(92%, 12rem)
-        );
-      }
-      .about-tl-flow__item[data-tl-kind="project"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, var(--accent-2) 22%, transparent) 0%,
-          transparent min(92%, 12rem)
-        );
-      }
-      .about-tl-flow__item[data-tl-kind="intern"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, #6d8494 17%, transparent) 0%,
-          transparent min(92%, 12rem)
-        );
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="edu"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, var(--accent-2) 11%, transparent) 0%,
-          transparent min(94%, 12rem)
-        );
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="project"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, var(--accent) 13%, transparent) 0%,
-          transparent min(94%, 12rem)
-        );
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="intern"] {
-        background: linear-gradient(
-          90deg,
-          color-mix(in srgb, #94a8b8 10%, transparent) 0%,
-          transparent min(94%, 12rem)
-        );
+        margin: 0 0 0.35rem 0;
+        padding: 0.2rem 0 0.2rem 0.7rem;
       }
       .about-tl-flow__item::before {
         content: "";
@@ -2521,18 +2085,6 @@
         background: color-mix(in srgb, var(--accent) 88%, #c9a86c);
         box-shadow: 0 0 12px 2px color-mix(in srgb, var(--accent) 22%, transparent);
         filter: blur(0.15px);
-      }
-      .about-tl-flow__item[data-tl-kind="edu"]::before {
-        background: color-mix(in srgb, #c0782a 78%, var(--accent));
-        box-shadow: 0 0 14px 3px color-mix(in srgb, #c9a86c 38%, transparent);
-      }
-      .about-tl-flow__item[data-tl-kind="project"]::before {
-        background: color-mix(in srgb, var(--accent-2) 72%, #2f5c4a);
-        box-shadow: 0 0 14px 3px color-mix(in srgb, var(--accent-2) 28%, transparent);
-      }
-      .about-tl-flow__item[data-tl-kind="intern"]::before {
-        background: color-mix(in srgb, #5c6f7e 88%, #8aa0b0);
-        box-shadow: 0 0 14px 3px color-mix(in srgb, #6d8494 32%, transparent);
       }
       .about-tl-flow__item:last-child {
         margin-bottom: 0;
@@ -2597,9 +2149,7 @@
       }
       .about-tl-flow__meta .about-tl-flow__period,
       .about-tl-flow__meta .about-tl-flow__type {
-        display: inline-flex;
-        align-items: center;
-        vertical-align: middle;
+        display: inline;
       }
       .about-tl-flow__period {
         font-size: clamp(1.1rem, 2.2vw, 1.3rem);
@@ -2609,49 +2159,12 @@
         color: var(--text);
       }
       .about-tl-flow__type {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-inline-start: 0.42rem;
-        padding: 0.2em 0.55em 0.18em;
-        border-radius: 999px;
-        border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-        font-size: clamp(0.76rem, 1.5vw, 0.85rem);
+        display: inline;
+        font-size: 0.7rem;
         font-weight: 600;
-        letter-spacing: 0.02em;
-        text-transform: none;
-        vertical-align: middle;
-        line-height: 1.25;
-      }
-      .about-tl-flow__item[data-tl-kind="edu"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, #b8955a 45%, var(--border));
-        background: color-mix(in srgb, #e6d2b2 22%, var(--bg-elevated));
-        color: color-mix(in srgb, var(--text) 55%, #6b4c20);
-      }
-      .about-tl-flow__item[data-tl-kind="project"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, var(--accent-2) 42%, var(--border));
-        background: color-mix(in srgb, var(--accent-2) 12%, var(--bg-elevated));
-        color: color-mix(in srgb, var(--text) 60%, var(--accent-2));
-      }
-      .about-tl-flow__item[data-tl-kind="intern"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, #697b8a 38%, var(--border));
-        background: color-mix(in srgb, #8a9eb0 12%, var(--bg-elevated));
-        color: color-mix(in srgb, var(--text) 62%, #3d4a54);
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="edu"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, var(--accent-2) 38%, var(--border));
-        background: color-mix(in srgb, var(--accent-2) 14%, var(--bg-alt));
-        color: color-mix(in srgb, var(--text) 92%, var(--accent-2));
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="project"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, var(--accent) 38%, var(--border));
-        background: color-mix(in srgb, var(--accent) 12%, var(--bg-alt));
-        color: color-mix(in srgb, var(--text) 90%, var(--accent));
-      }
-      [data-theme="dark"] .about-tl-flow__item[data-tl-kind="intern"] .about-tl-flow__type {
-        border-color: color-mix(in srgb, #8a9cae 32%, var(--border));
-        background: color-mix(in srgb, #6d8190 14%, var(--bg-alt));
-        color: color-mix(in srgb, var(--text) 88%, #a8b8c4);
+        color: var(--text-muted);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
       }
       .about-tl-flow__name {
         display: inline;
@@ -2665,19 +2178,17 @@
       }
       .about-tl-flow__role {
         display: inline;
-        font-size: clamp(0.82rem, 1.65vw, 0.92rem);
-        font-weight: 600;
+        font-size: 0.65rem;
         line-height: inherit;
-        color: color-mix(in srgb, var(--text) 94%, var(--text-muted));
+        color: var(--text);
         margin: 0;
         vertical-align: baseline;
       }
       .about-tl-flow__hl {
         display: inline;
-        font-size: clamp(0.78rem, 1.6vw, 0.9rem);
-        font-weight: 500;
+        font-size: 0.58rem;
         line-height: inherit;
-        color: color-mix(in srgb, var(--text-muted) 55%, var(--text));
+        color: var(--text-muted);
         margin: 0;
         vertical-align: baseline;
       }
@@ -2712,7 +2223,8 @@
       #proj-schnucks,
       #proj-olin-orientation,
       #proj-partydip,
-      #proj-tcfl {
+      #proj-tcfl,
+      #proj-must-grad-2020 {
         scroll-margin-top: calc(var(--nav-h) + 1rem);
       }
       .skill-cols--wide {
@@ -2733,16 +2245,6 @@
     </style>
   </head>
   <body data-locale="zh">
-    <!-- 油画肌理：作用于 About 区装饰层 -->
-    <svg class="site-filters" aria-hidden="true" width="0" height="0" style="position: absolute; overflow: hidden">
-      <defs>
-        <filter id="about-oil-impasto" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" stitchTiles="stitch" result="noise"></feTurbulence>
-          <feGaussianBlur in="noise" stdDeviation="1.4" result="noiseSmooth"></feGaussianBlur>
-          <feDisplacementMap in="SourceGraphic" in2="noiseSmooth" scale="13" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-        </filter>
-      </defs>
-    </svg>
     <a class="skip-link" href="#main"
       ><span class="i18n-zh">跳到主要内容</span><span class="i18n-en">Skip to main content</span></a
     >
@@ -2777,8 +2279,16 @@
             ><span class="i18n-zh">联系预约</span><span class="i18n-en">Let&apos;s Talk</span></a
           >
         </nav>
-        <div class="nav-actions" role="toolbar" aria-label="Language and display">
-          <button type="button" class="btn-lang" id="btnLocale">中 / EN</button>
+        <div class="nav-actions">
+          <div
+            class="nav-translate-wrap"
+            title="站内置换语言请用 中/EN 按钮 本下拉为 Google 机翻 更多语种 需联网 本地打开文件时可能无法使用"
+          >
+            <p class="nav-translate-label i18n-zh" lang="zh-CN">多语言机翻</p>
+            <p class="nav-translate-label i18n-en" lang="en">Auto translate</p>
+            <div id="google_translate_element" aria-label="Google 页面翻译 可选日语韩语等"></div>
+          </div>
+          <button type="button" class="btn-lang" id="btnLocale" title="中 / En">中 / EN</button>
           <button
             type="button"
             class="btn-theme"
@@ -2788,13 +2298,6 @@
           >
             <span class="icon-sun" aria-hidden="true">☀</span>
           </button>
-          <span class="nav-actions__divider" aria-hidden="true"></span>
-          <div class="nav-translate-wrap">
-            <div
-              id="google_translate_element"
-              aria-label="Google 网页翻译（可选日语等更多语言）"
-            ></div>
-          </div>
           <button type="button" class="nav-toggle" id="navToggle" aria-label="打开菜单" aria-expanded="false">
             ☰
           </button>
@@ -2820,6 +2323,7 @@
         <div class="deco-orb deco-orb--a" aria-hidden="true"></div>
         <div class="deco-orb deco-orb--b" aria-hidden="true"></div>
         <div class="wrap hero__grid hero__grid--photo">
+          <!-- 首屏肖像：images/portrait.png；油画风主题在页面 :root 与 body::before 噪声纹理中 -->
           <figure class="hero__figure">
             <div class="hero__imgbox" aria-label="油画风肖像画框">
               <img
@@ -2834,36 +2338,55 @@
             </div>
           </figure>
           <div class="hero__main">
-            <p class="kicker"><span lang="en">PORTFOLIO / OPEN STUDIO</span></p>
+            <p class="kicker"><span lang="en">OPEN STUDIO / LET&apos;S CONNECT</span></p>
             <h1>
               <span class="h1__name">赵梓淇</span>
               <span class="h1__en" lang="en">April Zhao</span>
             </h1>
-            <p class="hero__role i18n-zh">复合型增长运营操盘手</p>
-            <p class="hero__role i18n-en" lang="en">Growth &amp; ops — data × content</p>
-            <p class="hero__slogan i18n-zh">数据 × 运营 × 内容，用 AI 放大落地效率</p>
-            <p class="hero__slogan i18n-en" lang="en">Data × ops × content — AI to multiply execution</p>
-            <p class="hero__lede i18n-zh">
-              擅长从 0 到 1 落地增长全案，用数据翻译商业问题 — 欢迎聊增长策略、内容商业化与 AI 应用。</p>
-            <p class="hero__lede i18n-en" lang="en"
-              >0→1 growth programs, framing business problems in numbers—open to chat strategy, monetization &amp;
-              practical AI.</p
+            <p class="tagline-en" lang="en">Data gets creative · Stories build connections</p>
+            <p class="tagline i18n-zh">商业分析 增长与运营 内容商业化 欢迎对话与共创</p>
+            <p class="tagline i18n-en" lang="en"
+              >Business analytics growth and ops content open for dialogue and co-creation</p
             >
-            <div class="bento-metric" aria-label="代表性数据快照">
+            <p class="one-liner i18n-zh">
+              <strong>数据×运营×内容</strong>的复合型项目操盘手 擅长用数据翻译商业问题 从0到1落地增长与全案 并用 AI
+              工具放大创意效率与落地提效 期待和你聊增长策略 内容商业化与 AI 应用 欢迎把具体需求与场景告诉我 一起往前推进
+            </p>
+            <p class="one-liner i18n-en" lang="en"
+              >I work across <strong>data, growth, and content</strong> framing business questions in numbers shipping
+              <strong>0→1</strong> programs and full-funnel work and using <strong>AI</strong> to raise creative
+              quality and on-the-ground execution. I would love to talk <strong>growth, monetization, and AI in
+              practice</strong> share your needs and we take the next step together.
+            </p>
+            <div class="bento-metric" aria-label="与 Portfolio 一致的代表性数据（附业务场景）">
               <div class="bento-metric__cell">
                 <span class="bento-metric__num">43M+</span>
-                <span class="bento-metric__label i18n-zh">全案级曝光 · 品牌校园大场峰值</span>
-                <span class="bento-metric__label i18n-en" lang="en">Campaign-scale exposure, campus &amp; multi-channel peak moments</span>
+                <span class="bento-metric__label i18n-zh"
+                  >全案级曝光 品牌校园大场多渠道峰值 含直播与短视频分发 可与项目叙述交叉核验</span
+                >
+                <span class="bento-metric__label i18n-en" lang="en"
+                  >Campaign-scale exposure campus-scale multi-channel peak incl. live and short video cross-check with
+                  project write-ups</span
+                >
               </div>
               <div class="bento-metric__cell">
-                <span class="bento-metric__num">100万+</span>
-                <span class="bento-metric__label i18n-zh">全渠道累计播放 · 推广与自然流闭环</span>
-                <span class="bento-metric__label i18n-en" lang="en">Channel-wide plays paid + organic flywheel</span>
+                <span class="bento-metric__num">80万+</span>
+                <span class="bento-metric__label i18n-zh"
+                  >全渠道内容累计播放 推广与自然流量合成口径 可对应到具体账号战役复盘</span
+                >
+                <span class="bento-metric__label i18n-en" lang="en"
+                  >Total content plays in one measure paid and organic traceable to accounts and campaign reviews</span
+                >
               </div>
               <div class="bento-metric__cell">
                 <span class="bento-metric__num">2.2万+</span>
-                <span class="bento-metric__label i18n-zh">多平台 0→1 冷启 · 矩阵与转化落地</span>
-                <span class="bento-metric__label i18n-en" lang="en">0→1 cold-start across platforms accounts &amp; conversion</span>
+                <span class="bento-metric__label i18n-zh"
+                  >多平台0-1冷启粉丝 小红书抖音快手等账号矩阵 配合转化型内容与A/B测文案</span
+                >
+                <span class="bento-metric__label i18n-en" lang="en"
+                  >0→1 multi-platform cold-start on Xiaohongshu Douyin Kuaishou and more conversion-led copy and A/B
+                  tests</span
+                >
               </div>
             </div>
             <div class="contact-line contact-line--rows" aria-label="联系方式">
@@ -2925,23 +2448,42 @@
               >
             </div>
             <p class="hero-ice-breaker i18n-zh" lang="zh-CN">
-              最近在试 AI 在内容运营与转化链路里怎样落地更不翻车——你如果在做同类实验，约聊时带场景就直接开聊。
+              最近在研究 AI 在内容运营与转化链路里怎么落地不翻车 如果你也在做类似实验 约聊时直接说你的场景就好
             </p>
             <p class="hero-ice-breaker i18n-en" lang="en">
-              Exploring how AI lands in content → conversion safely—bring your scenario and we unpack it together.</p>
+              I am looking at how AI lands in content ops and the conversion path without misfiring if you are running
+              similar work say your scenario on the call
+            </p>
           </div>
           <aside class="hero__panel" aria-label="可聊话题">
-            <p class="hero__panel-title i18n-zh" style="font-style: normal" lang="zh">聊聊这些 · 我都接得住</p>
-            <p class="hero__panel-title i18n-en" lang="en">Glad to jam on…</p>
+            <p class="hero__panel-title i18n-zh" style="font-style: normal" lang="zh">聊聊这些，我都在</p>
+            <p class="hero__panel-title i18n-en" lang="en">If we go there, I am in</p>
             <div class="hero__chips">
-              <p class="hero__chip hero__chip--lead i18n-zh" lang="zh">🎓 留学 · 在读：WUSTL 学生大使，申请与生活类问题都可问。</p>
-              <p class="hero__chip hero__chip--lead i18n-en" lang="en">🎓 Study: WUSTL ambassador—applications &amp; life on campus.</p>
-              <p class="hero__chip hero__chip--lead i18n-zh" lang="zh">📈 运营 · 增长：0→1 全链路做过，踩坑与结果都能聊。</p>
-              <p class="hero__chip hero__chip--lead i18n-en" lang="en">📈 Ops &amp; growth: shipped 0→1—battle scars &amp; wins.</p>
-              <p class="hero__chip hero__chip--lead i18n-zh" lang="zh">🤖 AI：不聊空谈，只聊能进工作流的提效与自动化摸索。</p>
-              <p class="hero__chip hero__chip--lead i18n-en" lang="en">🤖 AI: practical workflows only—labs on automation.</p>
-              <p class="hero__chip hero__chip--lead i18n-zh" lang="zh">🧸 纯聊天也行：ENFJ，情绪树洞 / 脑洞搭子，天马行空欢迎。</p>
-              <p class="hero__chip hero__chip--lead i18n-en" lang="en">🧸 Or just vibe: ENFJ sounding board—wild ideas OK.</p>
+              <p class="hero__chip i18n-zh" lang="zh">
+                留学 / 专业：作为 WUSTL 学生大使，申请就读的问题都可以问我
+              </p>
+              <p class="hero__chip i18n-en" lang="en">
+                Study &amp; majors: as a WUSTL student ambassador, ask me anything on applying and life on campus
+              </p>
+              <p class="hero__chip i18n-zh" lang="zh">
+                运营 / 增长：活动和增长从 0 到 1 做过；内容侧选题、分发、转化与 A/B 也全链路跑过——踩过坑拿过结果，欢迎一起唠细节
+              </p>
+              <p class="hero__chip i18n-en" lang="en">
+                Ops &amp; growth: 0→1 on launches and programs; content side—topic, distribution, conversion, and A/B end
+                to end. Scars and wins—happy to compare notes and go deep
+              </p>
+              <p class="hero__chip i18n-zh" lang="zh">
+                AI 应用：不聊空概念，只聊能落地的提效方法，也在研究 AI 自动化起号
+              </p>
+              <p class="hero__chip i18n-en" lang="en">
+                AI: no empty talk only practical ways to get faster, plus experiments on AI-led account growth
+              </p>
+              <p class="hero__chip i18n-zh" lang="zh">
+                纯聊天也可：ENFJ，可当你的情绪树洞或创意搭子，天马行空都欢迎
+              </p>
+              <p class="hero__chip i18n-en" lang="en">
+                Or just talk: ENFJ, happy to be a sounding board or co-creator—come with the wildest ideas
+              </p>
             </div>
           </aside>
         </div>
@@ -2951,11 +2493,11 @@
         <div class="marquee-ribbon__inner">
           <div class="marquee-ribbon__track">
             <span>BA</span> · <span>DATA + OPS</span> · <span>CONTENT GROWTH</span> · <span>EVENTS</span> ·
-            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>PORTFOLIO</span> ·
+            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>OPEN CHAT</span> ·
           </div>
           <div class="marquee-ribbon__track" aria-hidden="true">
             <span>BA</span> · <span>DATA + OPS</span> · <span>CONTENT GROWTH</span> · <span>EVENTS</span> ·
-            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>PORTFOLIO</span> ·
+            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>OPEN CHAT</span> ·
           </div>
         </div>
       </div>
@@ -2963,14 +2505,10 @@
       <section id="about" class="section--line-top" aria-labelledby="about-heading">
         <div class="wrap wrap--about">
           <div class="about-paint-decor" aria-hidden="true">
-            <div class="about-paint-decor__layer">
-              <span class="about-paint-decor__wash"></span>
-              <span class="about-paint-decor__blob about-paint-decor__blob--a"></span>
-              <span class="about-paint-decor__blob about-paint-decor__blob--b"></span>
-              <span class="about-paint-decor__blob about-paint-decor__blob--c"></span>
-              <span class="about-paint-decor__smear about-paint-decor__smear--1"></span>
-              <span class="about-paint-decor__smear about-paint-decor__smear--2"></span>
-            </div>
+            <span class="about-paint-decor__blob about-paint-decor__blob--a"></span>
+            <span class="about-paint-decor__blob about-paint-decor__blob--b"></span>
+            <span class="about-paint-decor__blob about-paint-decor__blob--c"></span>
+            <span class="about-paint-decor__stroke"></span>
           </div>
           <header class="section-head">
             <p class="section-eyebrow" lang="en">ABOUT</p>
@@ -2978,10 +2516,10 @@
               <span class="i18n-zh">关于我</span><span class="i18n-en" lang="en">About me</span>
             </h2>
             <p class="sub sub--timeline-hint i18n-zh"
-              >点击时间轴查看教育 / 实习 / 项目经历，正文可展开详情；底部可预约交流。</p
+              >时间轴为经历一览 点击任一条可跳转教育/实习/项目 底部可预约</p
             >
             <p class="sub sub--timeline-hint i18n-en" lang="en"
-              >Tap any timeline row to jump; open cards below for detail. Booking at bottom.</p
+              >Chronological log; each item links to section. Book below.</p
             >
           </header>
           <div class="about-stage">
@@ -2999,17 +2537,23 @@
                   fetchpriority="high"
                 />
                 <div class="about-slot-ph about-slot-ph--solo" id="aboutIntroPh" hidden>
-                  <span class="i18n-zh" lang="zh-CN">若未见配图：将照片保存为 <code>images/about-intro.jpg</code> 后刷新。</span>
-                  <span class="i18n-en" lang="en">Add <code>images/about-intro.jpg</code>, then reload.</span>
+                  <span class="i18n-zh">将照片保存为 <code>images/about-intro.jpg</code> 后刷新</span>
+                  <span class="i18n-en" lang="en">Add <code>images/about-intro.jpg</code></span>
                 </div>
               </figure>
             </div>
             <div class="about-stage__text">
               <p class="about-hello i18n-zh" lang="zh-CN">
-                嗨，我是赵梓淇，你可以叫我小淇、梓淇或 April〜我想把这里做成<strong>双向交流</strong>的小角落：你带着问题或半成形的想法来，我们一起把思路捋清楚、找到下一步。互相学习，一起进步。
+                嗨 我是赵梓淇 你可以叫我小淇、梓淇、April 随你喜欢<br />
+                我希望把这个网页做成双向交流场 你带着问题或想法来<br />
+                我们可以一起把模糊的思路聊清楚 找到下一步<br />
+                互相学习 一起进步
               </p>
               <p class="about-hello i18n-en" lang="en">
-                Hi—I’m April (Ziqi). Call me <strong>小淇</strong>, <strong>梓淇</strong>, or <strong>April</strong>. This page is meant to be a <strong>two-way nook</strong>: bring a fuzzy question or idea and we shape it into a next step—and learn together.
+                Hi, I am Ziqi (April) Zhao. Call me <strong>小淇</strong>, <strong>梓淇</strong>, or
+                <strong>April</strong>—whatever you like. I want this page to be a <strong>two-way space</strong>: bring a
+                question or a half-formed idea, and we can untangle it and find a next step—learn from each other and keep
+                moving.
               </p>
               <p class="about-lang-note i18n-zh" lang="zh-CN">支持中文/英文交流</p>
               <p class="about-lang-note i18n-en" lang="en">中文 or English, both welcome</p>
@@ -3020,19 +2564,11 @@
             style="margin: 0.5rem 0 0.75rem; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.18em"
             lang="en"
           >
-            TIMELINE · 成长线
+            TIMELINE / 时间轴
           </h3>
           <div class="about-cv-block">
-            <div class="about-tl-cluster i18n-zh" lang="zh-CN">
-            <p class="about-tl-cluster__label" lang="zh-CN">
-              <span class="about-tl-cluster__lead"
-                ><span class="about-tl-cluster__range">2019—2024</span>
-                <span class="about-tl-cluster__topic">澳门求学</span></span
-              >
-              <span class="about-tl-cluster__sub">实习城市：北京 · 澳门 · 深圳</span>
-            </p>
-            <ol class="about-tl-flow" role="list" lang="zh-CN" aria-label="澳门阶段经历">
-              <li class="about-tl-flow__item" data-tl-kind="edu">
+            <ol class="about-tl-flow i18n-zh" role="list" lang="zh-CN" aria-label="经历时间轴">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#edu-must">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2019.08 — 2023.06</span>
@@ -3042,7 +2578,17 @@
                   <span class="about-tl-flow__hl">GPA 3.78，连续3年院长表彰</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
+                <a class="about-tl-flow__link" href="#proj-must-grad-2020">
+                  <span class="about-tl-flow__meta"
+                    ><span class="about-tl-flow__period">2020.05 — 2020.06</span>
+                    <span class="about-tl-flow__type">📌 项目</span></span>
+                  <span class="about-tl-flow__name">毕业晚宴（200+ 人）</span>
+                  <span class="about-tl-flow__role">总务与财务负责人</span>
+                  <span class="about-tl-flow__hl">成本偏差≤8%，方案成为学院模板</span>
+                </a>
+              </li>
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-tcfl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2021.04 — 2021.05</span>
@@ -3052,7 +2598,7 @@
                   <span class="about-tl-flow__hl">获双项实践认证</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-baidu">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2022.06 — 2022.11</span>
@@ -3062,17 +2608,17 @@
                   <span class="about-tl-flow__hl">活动曝光 4300 万+，降本 40%</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-macau-museum">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2023.01 — 2023.05</span>
                     <span class="about-tl-flow__type">💼 实习</span></span>
                   <span class="about-tl-flow__name">澳门博物馆</span>
                   <span class="about-tl-flow__role">用户调研与运营实习生</span>
-                  <span class="about-tl-flow__hl">有效问卷 1000+，Tableau 传播复盘｜梳理文物交接等流程标准</span>
+                  <span class="about-tl-flow__hl">1000+ 问卷分析，Tableau 传播复盘</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-lingyi">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2023.06 — 2023.12</span>
@@ -3082,18 +2628,7 @@
                   <span class="about-tl-flow__hl">3 个月 7 账号 2.2 万粉，高转化内容 55%</span>
                 </a>
               </li>
-            </ol>
-            </div>
-            <div class="about-tl-cluster i18n-zh" lang="zh-CN">
-            <p class="about-tl-cluster__label" lang="zh-CN">
-              <span class="about-tl-cluster__lead"
-                ><span class="about-tl-cluster__range">2024—2026</span>
-                <span class="about-tl-cluster__topic">硕士与项目</span></span
-              >
-              <span class="about-tl-cluster__sub">美国 · 密苏里州 · 圣路易斯市</span>
-            </p>
-            <ol class="about-tl-flow" role="list" lang="zh-CN" aria-label="圣路易斯阶段经历">
-              <li class="about-tl-flow__item" data-tl-kind="edu">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#edu-wustl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2024.08 — 2025.12</span>
@@ -3103,7 +2638,7 @@
                   <span class="about-tl-flow__hl">GPA 3.83，Beta Gamma Sigma</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-partydip">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.01 — 2025.04</span>
@@ -3113,7 +2648,7 @@
                   <span class="about-tl-flow__hl">注册完成率 38%→75%</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-wustl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.05 — 2025.08</span>
@@ -3123,7 +2658,7 @@
                   <span class="about-tl-flow__hl">活动注册率 60%→90%，沉淀 SOP</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-olin-orientation">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.07 — 2025.08</span>
@@ -3133,7 +2668,7 @@
                   <span class="about-tl-flow__hl">注册率 60%→90%，满意度 4.8/5</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-schnucks">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.08 — 2025.12</span>
@@ -3144,17 +2679,8 @@
                 </a>
               </li>
             </ol>
-            </div>
-            <div class="about-tl-cluster i18n-en" lang="en">
-            <p class="about-tl-cluster__label" lang="en">
-              <span class="about-tl-cluster__lead"
-                ><span class="about-tl-cluster__range">2019—2024</span>
-                <span class="about-tl-cluster__topic">Undergraduate · Macao</span></span
-              >
-              <span class="about-tl-cluster__sub">Internships · Beijing · Macao · Shenzhen</span>
-            </p>
-            <ol class="about-tl-flow" role="list" lang="en" aria-label="Macao chapter">
-              <li class="about-tl-flow__item" data-tl-kind="edu">
+            <ol class="about-tl-flow i18n-en" role="list" lang="en" aria-label="Experience timeline">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#edu-must">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2019.08 — 2023.06</span>
@@ -3164,7 +2690,17 @@
                   <span class="about-tl-flow__hl">GPA 3.78; dean’s list 3 years running</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
+                <a class="about-tl-flow__link" href="#proj-must-grad-2020">
+                  <span class="about-tl-flow__meta"
+                    ><span class="about-tl-flow__period">2020.05 — 2020.06</span>
+                    <span class="about-tl-flow__type">📌 Project</span></span>
+                  <span class="about-tl-flow__name">Graduation gala (200+)</span>
+                  <span class="about-tl-flow__role">Logistics &amp; finance lead</span>
+                  <span class="about-tl-flow__hl">Cost variance ≤8%; model template for the college</span>
+                </a>
+              </li>
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-tcfl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2021.04 — 2021.05</span>
@@ -3174,7 +2710,7 @@
                   <span class="about-tl-flow__hl">Two practice certifications</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-baidu">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2022.06 — 2022.11</span>
@@ -3184,17 +2720,17 @@
                   <span class="about-tl-flow__hl">43M+ event reach; 40% cost down</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-macau-museum">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2023.01 — 2023.05</span>
                     <span class="about-tl-flow__type">💼 Intern</span></span>
                   <span class="about-tl-flow__name">Macao Museum</span>
                   <span class="about-tl-flow__role">UXR &amp; operations</span>
-                  <span class="about-tl-flow__hl">1000+ validated surveys; Tableau comms; artifact handoff SOPs</span>
+                  <span class="about-tl-flow__hl">1000+ survey analysis; Tableau comms review</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-lingyi">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2023.06 — 2023.12</span>
@@ -3204,18 +2740,7 @@
                   <span class="about-tl-flow__hl">7 accounts, 22k fans in 3 months; 55% high-conv</span>
                 </a>
               </li>
-            </ol>
-            </div>
-            <div class="about-tl-cluster i18n-en" lang="en">
-            <p class="about-tl-cluster__label" lang="en">
-              <span class="about-tl-cluster__lead"
-                ><span class="about-tl-cluster__range">2024—2026</span>
-                <span class="about-tl-cluster__topic">Master’s &amp; projects</span></span
-              >
-              <span class="about-tl-cluster__sub">St. Louis · Missouri · USA</span>
-            </p>
-            <ol class="about-tl-flow" role="list" lang="en" aria-label="St. Louis chapter">
-              <li class="about-tl-flow__item" data-tl-kind="edu">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#edu-wustl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2024.08 — 2025.12</span>
@@ -3225,7 +2750,7 @@
                   <span class="about-tl-flow__hl">GPA 3.83; Beta Gamma Sigma</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-partydip">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.01 — 2025.04</span>
@@ -3235,7 +2760,7 @@
                   <span class="about-tl-flow__hl">Reg completion 38%→75%</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="intern">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#intern-wustl">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.05 — 2025.08</span>
@@ -3245,7 +2770,7 @@
                   <span class="about-tl-flow__hl">Event reg 60%→90%; SOPs in place</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-olin-orientation">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.07 — 2025.08</span>
@@ -3255,7 +2780,7 @@
                   <span class="about-tl-flow__hl">Reg 60%→90%; 4.8/5 satisfaction</span>
                 </a>
               </li>
-              <li class="about-tl-flow__item" data-tl-kind="project">
+              <li class="about-tl-flow__item">
                 <a class="about-tl-flow__link" href="#proj-schnucks">
                   <span class="about-tl-flow__meta"
                     ><span class="about-tl-flow__period">2025.08 — 2025.12</span>
@@ -3266,7 +2791,6 @@
                 </a>
               </li>
             </ol>
-            </div>
             <p class="about-tl-cta i18n-zh" lang="zh-CN">
               <a class="about-cta-brief" href="#coffee">下一步 · 预约交流</a>
               <span class="about-cta-fine">中/EN 与机翻在导航，预约见下</span>
@@ -3293,8 +2817,8 @@
                   decoding="async"
                 />
                 <div class="about-slot-ph" hidden>
-                  <span class="i18n-zh" lang="zh-CN">若未见配图：保存为 <code>images/about-5.jpg</code> 后刷新。</span>
-                  <span class="i18n-en" lang="en">Add <code>images/about-5.jpg</code>, then reload.</span>
+                  <span class="i18n-zh"><code>about-5.jpg</code></span>
+                  <span class="i18n-en" lang="en"><code>about-5</code></span>
                 </div>
               </li>
               <li class="about-film__cell">
@@ -3308,8 +2832,8 @@
                   decoding="async"
                 />
                 <div class="about-slot-ph" hidden>
-                  <span class="i18n-zh" lang="zh-CN">若未见配图：保存为 <code>images/about-6.jpg</code> 后刷新。</span>
-                  <span class="i18n-en" lang="en">Add <code>images/about-6.jpg</code>, then reload.</span>
+                  <span class="i18n-zh"><code>about-6.jpg</code></span>
+                  <span class="i18n-en" lang="en"><code>about-6</code></span>
                 </div>
               </li>
               <li class="about-film__cell">
@@ -3323,8 +2847,8 @@
                   decoding="async"
                 />
                 <div class="about-slot-ph" hidden>
-                  <span class="i18n-zh" lang="zh-CN">若未见配图：保存为 <code>images/about-7.jpg</code> 后刷新。</span>
-                  <span class="i18n-en" lang="en">Add <code>images/about-7.jpg</code>, then reload.</span>
+                  <span class="i18n-zh"><code>about-7.jpg</code></span>
+                  <span class="i18n-en" lang="en"><code>about-7</code></span>
                 </div>
               </li>
               <li class="about-film__cell">
@@ -3338,8 +2862,8 @@
                   decoding="async"
                 />
                 <div class="about-slot-ph" hidden>
-                  <span class="i18n-zh" lang="zh-CN">若未见配图：保存为 <code>images/about-8.jpg</code> 后刷新。</span>
-                  <span class="i18n-en" lang="en">Add <code>images/about-8.jpg</code>, then reload.</span>
+                  <span class="i18n-zh"><code>about-8.jpg</code></span>
+                  <span class="i18n-en" lang="en"><code>about-8</code></span>
                 </div>
               </li>
             </ul>
@@ -3347,43 +2871,19 @@
           <h3
             class="section-eyebrow"
             style="margin: 1.5rem 0 0.75rem; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.2em"
+            lang="en"
           >
-            <span class="i18n-zh" lang="zh-CN">高光条目</span
-            ><span class="i18n-en" lang="en">SPOTLIGHTS</span>
+            SPOTLIGHTS
           </h3>
           <div class="grid-tags">
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">WashU · 商业分析硕士 · GPA 3.83</span
-              ><span class="i18n-en" lang="en">WashU MSBA · GPA 3.83/4.0</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">Beta Gamma Sigma 荣誉 · 前 5%</span
-              ><span class="i18n-en" lang="en">Beta Gamma Sigma · top 5%</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">院长奖学金 · $20,000</span
-              ><span class="i18n-en" lang="en">Dean’s Scholarship · $20,000</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">WashU 学生大使</span
-              ><span class="i18n-en" lang="en">WashU Student Ambassador</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">内容累计播放 100 万+</span
-              ><span class="i18n-en" lang="en">Content plays 1M+</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">7 账号 0→1 冷启 · 2.2 万粉</span
-              ><span class="i18n-en" lang="en">7 accounts 0→1 · 22k followers</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">中英流利 · 雅思 7.0（口语 7.5）</span
-              ><span class="i18n-en" lang="en">Bilingual · IELTS 7.0 (7.5 speaking)</span></span
-            >
-            <span class="pill"
-              ><span class="i18n-zh" lang="zh-CN">建模 · 增长 · 活动 · 内容商业化 · A/B</span
-              ><span class="i18n-en" lang="en">Modeling · growth · programs · monetization · A/B</span></span
-            >
+            <span class="pill">圣路易斯华盛顿大学 商业分析硕士 GPA 3.83/4.0</span>
+            <span class="pill">Beta Gamma Sigma 国际商学院荣誉会员（前5%）</span>
+            <span class="pill">院长奖学金 $20,000</span>
+            <span class="pill">WashU 官方学生大使</span>
+            <span class="pill">内容运营累计播放 80 万+</span>
+            <span class="pill">7 个账号从 0 冷启动，粉丝 2.2 万</span>
+            <span class="pill">中英双语流利，雅思 7.0（口语 7.5）</span>
+            <span class="pill">数据建模、用户增长、活动运营、内容商业化、A/B 测试</span>
           </div>
         </div>
       </section>
@@ -3393,61 +2893,39 @@
           <header class="section-head">
             <p class="section-eyebrow" lang="en">EDUCATION</p>
             <h2 id="edu-heading"><span class="i18n-zh">教育经历</span><span class="i18n-en" lang="en">Education</span></h2>
-            <p class="sub i18n-zh">最新在前；展开卡片可看课程要点与荣誉详情。</p>
-            <p class="sub i18n-en" lang="en">Newest first — expand cards for courses &amp; honors.</p>
+            <p class="sub i18n-zh">时间倒序，点击卡片可展开课程与荣誉</p>
+            <p class="sub i18n-en" lang="en">Newest first. Expand cards for full courses and honors (Chinese).</p>
           </header>
           <div class="stack">
             <details class="card" open id="edu-wustl">
               <summary>
-                <span class="card-summary__lead">
-                  <span class="edu-brand-icon" aria-hidden="true"
-                    ><img
-                      src="images/edu-logo-wustl.svg?v=1"
-                      alt=""
-                      width="44"
-                      height="44"
-                      decoding="async"
-                      fetchpriority="low"
-                  /></span>
-                  <span>
-                    圣路易斯华盛顿大学 · 奥林商学院<br />
-                    <span class="meta">商业分析硕士 | 2024.08 - 2025.12 · GPA 3.83/4.0</span>
-                  </span>
+                <span>
+                  圣路易斯华盛顿大学 · 奥林商学院<br />
+                  <span class="meta">商业分析硕士 | 2024.08 - 2025.12 · GPA 3.83/4.0</span>
                 </span>
               </summary>
               <div class="card-body">
                 <p>
-                  <strong>核心课程：</strong>市场调研 · 广告与定价策略 · 数字营销 · A/B 测试 ·
-                  <strong>Python</strong> · <strong>机器学习</strong> · 决策分析 · 文本挖掘 · 大数据与云计算
+                  <strong>核心课程：</strong>市场调研、广告与定价策略、数字营销、A/B
+                  测试、Python、机器学习、决策分析、文本挖掘、大数据与云计算
                 </p>
                 <p>
-                  <strong>荣誉：</strong><strong>Beta Gamma Sigma</strong>、院长奖学金 $20,000、官方学生大使
+                  <strong>荣誉：</strong>Beta Gamma Sigma、院长奖学金 $20,000、官方学生大使
                 </p>
               </div>
             </details>
             <details class="card" id="edu-must">
               <summary>
-                <span class="card-summary__lead">
-                  <span class="edu-brand-icon" aria-hidden="true"
-                    ><img
-                      src="images/edu-logo-must.svg?v=1"
-                      alt=""
-                      width="44"
-                      height="44"
-                      decoding="async"
-                      fetchpriority="low"
-                  /></span>
-                  <span>
-                    澳门科技大学 · 酒店与旅游管理学院<br />
-                    <span class="meta">会展管理学士 | 2019.08 - 2023.06 · GPA 3.78/4.0</span>
-                  </span>
+                <span>
+                  澳门科技大学 · 酒店与旅游管理学院<br />
+                  <span class="meta">会展管理学士 | 2019.08 - 2023.06 · GPA 3.78/4.0</span>
                 </span>
               </summary>
               <div class="card-body">
                 <p>
-                  <strong>核心课程：</strong>旅游市场营销 · 会展与广告 · 品牌管理 · 市场调研方法 · 消费者心理学 · 商务统计
+                  <strong>核心课程：</strong>旅游市场营销、会展与广告、品牌管理、市场调研方法、消费者心理学、商务统计
                 </p>
-                <p><strong>荣誉：</strong>连续 3 年院长表彰名单、<strong>年级前 5%</strong></p>
+                <p><strong>荣誉：</strong>连续 3 年院长表彰名单、年级前 5%</p>
               </div>
             </details>
           </div>
@@ -3459,8 +2937,8 @@
           <header class="section-head">
             <p class="section-eyebrow" lang="en">EXPERIENCE</p>
             <h2 id="intern-heading"><span class="i18n-zh">实习经历</span><span class="i18n-en" lang="en">Experience</span></h2>
-            <p class="sub i18n-zh">每段带 KPI 提要，点击卡片可看细节与产出</p>
-            <p class="sub i18n-en" lang="en">Each card tees up KPIs—expand for how it was achieved.</p>
+            <p class="sub i18n-zh">带数据高亮，点击展开详情</p>
+            <p class="sub i18n-en" lang="en">KPI chips + expand for detail (bullets in Chinese).</p>
           </header>
           <div class="stack">
             <details class="intern-block" id="intern-wustl">
@@ -3471,15 +2949,14 @@
                   <span class="stat">注册率 60%→90%</span>
                   <span class="stat">到场率 80%</span>
                   <span class="stat">互动率 2.5%→8.3%</span>
-                  <span class="stat">筹备周期 - 30%</span>
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
                 <ul>
-                  <li>主导 10 + 场学术论坛与招生活动全流程运营，报名链路优化使注册率从 60% 提升至 90%，到场率稳定 80%</li>
-                  <li>搭建活动标准化 SOP，将筹备周期缩短 30%，实现流程可复用</li>
-                  <li>运营社媒内容矩阵，单篇阅读破万，互动率从 2.5% 提升至 8.3%</li>
+                  <li>统筹 10+ 场学术论坛与招生活动，注册率 60%→90%，到场率 80%</li>
+                  <li>优化 SOP，筹备周期缩短 30%</li>
+                  <li>社媒内容阅读量破万，互动率 2.5%→8.3%</li>
                 </ul>
               </div>
             </details>
@@ -3489,17 +2966,16 @@
                 <span class="period">2023.06 - 2023.12</span>
                 <div class="stat-row">
                   <span class="stat">7 个账号冷启动</span>
-                  <span class="stat">3 个月 500 + 视频</span>
+                  <span class="stat">3 个月 500+ 视频</span>
                   <span class="stat">粉丝 2.2 万</span>
-                  <span class="stat">高转化内容 55%</span>
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
                 <ul>
-                  <li>负责 7 个海外账号从 0 到 1 冷启动，3 个月产出 500 + 条内容，累计粉丝突破 2.2 万</li>
-                  <li>通过 A/B 测试迭代内容策略，将高转化内容占比从 30% 提升至 55%</li>
-                  <li>搭建内容数据看板，建立「策略 - 执行 - 复盘」全链路闭环，实现内容商业化落地</li>
+                  <li>7 个账号冷启动，3 个月产出 500+ 视频，粉丝 2.2 万</li>
+                  <li>A/B 测试优化内容，高转化内容占比 30%→55%</li>
+                  <li>搭建数据看板，形成策略-执行-复盘闭环</li>
                 </ul>
               </div>
             </details>
@@ -3508,18 +2984,15 @@
                 <h3>澳门博物馆 · 用户调研与运营实习生</h3>
                 <span class="period">2023.01 - 2023.05</span>
                 <div class="stat-row">
-                  <span class="stat">调研样本 1000+</span>
-                  <span class="stat">用户满意度调研</span>
-                  <span class="stat">流程标准化落地</span>
+                  <span class="stat">问卷 1000+</span>
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
                 <ul>
-                  <li>主导用户满意度调研，回收有效问卷 1000+ 份，建立用户画像与需求洞察体系</li>
-                  <li>使用 SPSS/Excel 分析用户行为数据，输出可落地的运营优化方案，观展人数实现显著提升</li>
-                  <li>梳理文物交接、展品管理等核心流程，输出标准化 SOP，降低交接误差与沟通成本</li>
-                  <li>基于调研结果优化多渠道传播策略，提升博物馆公众触达与参与度</li>
+                  <li>主导用户满意度调研，回收问卷 1000+</li>
+                  <li>SPSS/Excel 分析用户行为，输出优化方案</li>
+                  <li>多渠道传播，观展人数显著提升</li>
                 </ul>
               </div>
             </details>
@@ -3528,23 +3001,26 @@
                 <h3>百度 · 校园品牌部 · 活动运营实习生</h3>
                 <span class="period">2022.06 - 2022.11</span>
                 <div class="stat-row">
-                  <span class="stat">曝光 4300 万 +</span>
-                  <span class="stat">直播峰值 30 万 +</span>
+                  <span class="stat">曝光 4300 万+</span>
+                  <span class="stat">直播峰值 30 万+</span>
                   <span class="stat">成本优化 40%</span>
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
                 <ul>
-                  <li>统筹 CCF 60 周年分会场全案运营，活动总曝光 4300 万 +，直播峰值 30 万 +</li>
-                  <li>通过内部化内容制作与流程优化，将项目成本降低 40%</li>
-                  <li>沉淀大型活动 SOP 与风险管理模板，形成可复用的项目资产</li>
+                  <li>统筹 CCF 60 周年分会场，曝光 4300 万+，直播峰值 30 万+</li>
+                  <li>成本优化 40%，内部化制作与剪辑</li>
+                  <li>沉淀大型活动 SOP、风险管理模板</li>
                 </ul>
                 <p class="intern-body__ccf-cap i18n-zh" lang="zh-CN" id="baidu-ccf-cap-zh">
-                  活动现场实拍：包含主舞台、嘉宾合影、签到区等环节（共 10 张）
+                  以下为 CCF（中国计算机学会）相关活动照片；张数与顺序由本页顶部的
+                  <code>APRIL_BAIDU_CCF.files</code> 控制。宽屏为<strong>一行五张</strong>、自动换行（例如 10 张为上下两行各五张），窄屏为三列/两列/单列；可点击单张在新标签页打开原图。
                 </p>
                 <p class="intern-body__ccf-cap i18n-en" lang="en" id="baidu-ccf-cap-en">
-                  On-site photos: main stage, group shots, check-in, and more.
+                  CCF event photos. Count and order follow <code>APRIL_BAIDU_CCF.files</code> at the top of this file. Five
+                  per row on wide screens (e.g. 10 items = 2×5), fewer columns on small screens. Click to open in a new
+                  tab.
                 </p>
                 <div
                   class="intern-body__photo-row intern-body__photo-row--ccf5"
@@ -3566,8 +3042,8 @@
                           alt="CCF 活动：舞台大合影，多人持证书，背屏为 CCF 60 周年科普主视觉"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-1.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-1.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 1 未找到。请将原图存为 <code>images/intern-baidu-1.jpg</code> 或 <code>images/intern-baidu-1.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-1.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3586,8 +3062,8 @@
                           alt="CCF 60 论坛/圆桌，五位嘉宾席，背屏为活动标题、嘉宾与百度直播等合作媒体"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-2.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-2.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 2 未找到。请将原图存为 <code>images/intern-baidu-2.jpg</code> 或 <code>images/intern-baidu-2.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-2.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3606,8 +3082,8 @@
                           alt="CCF 主视觉横版海报，数智/数字知未来、发光书、承办与媒体合作"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-3.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-3.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 3 未找到。请将原图存为 <code>images/intern-baidu-3.jpg</code> 或 <code>images/intern-baidu-3.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-3.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3626,8 +3102,8 @@
                           alt="台上颁奖/颁证，背屏列名含中国计算机学会、百度产学合作等"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-4.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-4.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 4 未找到。请将原图存为 <code>images/intern-baidu-4.jpg</code> 或 <code>images/intern-baidu-4.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-4.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3646,8 +3122,8 @@
                           alt="展厅内与着浅蓝制服的参访者交流，蓝色信息展墙与流程图"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-5.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-5.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 5 未找到。请将原图存为 <code>images/intern-baidu-5.jpg</code> 或 <code>images/intern-baidu-5.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-5.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3666,8 +3142,8 @@
                           alt="CCF 计算机博物馆：算盘与算筹等展墙，导览与少年儿童"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-6.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-6.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 6 未找到。请将原图存为 <code>images/intern-baidu-6.jpg</code> 或 <code>images/intern-baidu-6.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-6.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3686,8 +3162,8 @@
                           alt="「CCF 创建 60 周年庆典」背板、大型 60 标识与团队合影"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-7.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-7.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 7 未找到。请将原图存为 <code>images/intern-baidu-7.jpg</code> 或 <code>images/intern-baidu-7.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-7.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3706,8 +3182,8 @@
                           alt="互动科技演示，少儿可穿戴/传感，展区含超导计算机等标识"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-8.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-8.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 8 未找到。请将原图存为 <code>images/intern-baidu-8.jpg</code> 或 <code>images/intern-baidu-8.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-8.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3726,8 +3202,8 @@
                           alt="CCF 活动相关现场（与实习支持活动一致，可按实图在 alts 中改文案）"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-9.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-9.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 9 未找到。请将原图存为 <code>images/intern-baidu-9.jpg</code> 或 <code>images/intern-baidu-9.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-9.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3746,8 +3222,8 @@
                           alt="CCF 活动相关现场（与实习支持活动一致，可按实图在 alts 中改文案）"
                         />
                         <p class="intern-body__photo-missing" hidden>
-                          <span class="i18n-zh" lang="zh-CN">此图暂未显示：将照片保存为 <code>images/intern-baidu-10.jpg</code>（或同名的 .png）后刷新。</span>
-                          <span class="i18n-en" lang="en">Snap not loaded yet—save as <code>images/intern-baidu-10.jpg</code> (or .png), reload.</span>
+                          <span class="i18n-zh" lang="zh-CN">图 10 未找到。请将原图存为 <code>images/intern-baidu-10.jpg</code> 或 <code>images/intern-baidu-10.png</code> 后强刷。</span>
+                          <span class="i18n-en" lang="en">Missing. Add <code>images/intern-baidu-10.jpg</code> or <code>.png</code>.</span>
                         </p>
                       </div>
                     </a>
@@ -3800,9 +3276,11 @@
             <h2 id="proj-heading">
               <span class="i18n-zh">项目经历</span><span class="i18n-en" lang="en">Project portfolio</span>
             </h2>
-            <p class="sub i18n-zh">咨询分析、增长落地与教学活动等；中英分栏展开看角色与成果。</p>
+            <p class="sub i18n-zh"
+              >课程与组织类项目，含咨询型分析、增长与活动落地、跨文化教学与大型晚宴执行 展开可查看简述、职责与成果</p
+            >
             <p class="sub i18n-en" lang="en"
-              >Analytics, growth, and programs—in each card you get EN summary + fuller ZH.</p
+              >A mix of analytics, growth, and programs. Expand each card. Chinese detail with English summary.</p
             >
           </header>
           <div class="stack">
@@ -3876,8 +3354,8 @@
                   <span class="i18n-zh" lang="zh-CN">奥林商学院 · 研究生迎新项目</span>
                   <span class="i18n-en" lang="en">Olin — graduate student orientation (lead)</span>
                 </h3>
-                <span class="period i18n-zh" lang="zh-CN">2025.07-2025.08</span>
-                <span class="period i18n-en" lang="en">2025.07 – 2025.08</span>
+                <span class="period i18n-zh" lang="zh-CN">日期待补充（学年内）</span>
+                <span class="period i18n-en" lang="en">TBD (within the academic year)</span>
                 <span class="proj-role i18n-zh" lang="zh-CN">活动策划负责人</span>
                 <span class="proj-role i18n-en" lang="en">Program design lead</span>
                 <span class="chev" aria-hidden="true">▼</span>
@@ -4053,6 +3531,55 @@
                 </div>
               </div>
             </details>
+            <details class="intern-block" id="proj-must-grad-2020">
+              <summary>
+                <h3>
+                  <span class="i18n-zh" lang="zh-CN"
+                    >澳门科技大学酒店与旅游管理学院 · 2020 毕业晚宴</span
+                  >
+                  <span class="i18n-en" lang="en">MUST / HTM — 2020 graduation gala</span>
+                </h3>
+                <span class="period i18n-zh" lang="zh-CN">2020 · 约 200+ 人</span>
+                <span class="period i18n-en" lang="en">2020 · 200+ guests</span>
+                <span class="proj-role i18n-zh" lang="zh-CN">总务与财务负责人</span>
+                <span class="proj-role i18n-en" lang="en">Finance &amp; ops lead</span>
+                <span class="chev" aria-hidden="true">▼</span>
+              </summary>
+              <div class="intern-body project-body">
+                <div class="i18n-zh project-i18n" lang="zh-CN">
+                  <h4 class="proj-h">项目简述</h4>
+                  <p>
+                    统筹 2020 酒店与旅游管理学院毕业晚宴 负责财务与总务
+                    成本优化、跨方协同与现场执行 作为院系大型活动执行范例
+                  </p>
+                  <h4 class="proj-h">主要职责</h4>
+                  <ul>
+                    <li>Excel 预算表 多供比价与物料复用 严控成本</li>
+                    <li>三方同步与标准化执行规范 联合彩排 提升跨方沟通效率</li>
+                    <li>动线设计与区域分工 现场突发处置</li>
+                    <li>活动交付与总结 形成标准化执行方案</li>
+                  </ul>
+                  <h4 class="proj-h">项目成就</h4>
+                  <p>
+                    成本偏差 <strong>≤8%</strong> 优于 <strong>≤15%</strong> 目标
+                    跨方沟通效率提升 <strong>30%</strong> 整体满意度 <strong>≥95%</strong> 获校方专项表彰
+                    方案被纳为后续院系大型活动标准模板
+                  </p>
+                </div>
+                <div class="i18n-en project-i18n" lang="en">
+                  <h4 class="proj-h">Summary</h4>
+                  <p>200+ guest gala: owned budget, vendors, and floor ops—tight cost control, cross-team playbooks, and 95%+ satisfaction.</p>
+                  <h4 class="proj-h">Responsibilities</h4>
+                  <ul>
+                    <li>Budget model, bidding, and reuse to hit variance targets</li>
+                    <li>Joint rehearsals and SOPs across three stakeholder groups</li>
+                    <li>Run-of-show, contingencies, and handover pack</li>
+                  </ul>
+                  <h4 class="proj-h">Outcomes</h4>
+                  <p>Cost within 8% vs 15% cap; +30% comms efficiency; commended; template reused for later school events.</p>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </section>
@@ -4064,43 +3591,46 @@
             <h2 id="skills-heading">
               <span class="i18n-zh">技能与工具</span><span class="i18n-en" lang="en">Skills &amp; tools</span>
             </h2>
-            <p class="sub i18n-zh">学习与实践里常用的工具与方法；条形图为自评速览，欢迎当面细聊。</p>
-            <p class="sub i18n-en" lang="en">Coursework plus hands-on projects—the bars are quick self ratings; glad to go deeper anytime.</p>
+            <p class="sub i18n-zh"
+              >结合 MSBA 训练与项目/工作实践，覆盖数据、商分、增长、内容与合作工具。进度条为自评，仅作速览；欢迎当面展开。</p
+            >
+            <p class="sub i18n-en" lang="en"
+              >A practical map from my MSBA training plus internships and own projects. Sliders are self-rated for quick
+              scanning, not a test score.
+            </p>
           </header>
           <div class="skill-cols skill-cols--wide">
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">📊</span>
-                <span
-                  ><span class="i18n-zh">数据与计量</span><span class="i18n-en" lang="en">Data &amp; econometrics</span></span
-                >
+              <h3>
+                <span class="i18n-zh">数据与计量</span><span class="i18n-en" lang="en">Data &amp; econometrics</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">Python</span>
-                <span class="tag tag--focus">SQL</span>
+                <span class="tag">Python</span>
+                <span class="tag">R</span>
+                <span class="tag">SQL</span>
                 <span class="tag">Pandas / NumPy</span>
-                <span class="tag">Excel 高阶</span>
-                <span class="tag">SPSS</span>
                 <span class="tag">scikit-learn</span>
                 <span class="tag">Logit / 离散选择</span>
+                <span class="tag">SPSS</span>
+                <span class="tag">Excel 高阶</span>
+                <span class="tag">A/B 测试</span>
+                <span class="tag">数据清洗</span>
+                <span class="tag">统计推断</span>
+                <span class="tag">特征工程</span>
               </div>
               <div class="meter">
-                <span class="i18n-zh">数据建模与商业解读</span
-                ><span class="i18n-en" lang="en">Modeling for business impact</span>
+                <span class="i18n-zh">统计建模与解读</span><span class="i18n-en" lang="en">Modeling &amp; interpretation</span>
                 <div class="track"><div class="fill" style="width: 90%"></div></div>
               </div>
             </div>
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">📑</span>
-                <span
-                  ><span class="i18n-zh">可视化与汇报</span><span class="i18n-en" lang="en">Viz &amp; storytelling</span></span
-                >
+              <h3>
+                <span class="i18n-zh">可视化与汇报</span><span class="i18n-en" lang="en">Viz &amp; storytelling</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">Tableau</span>
-                <span class="tag tag--focus">看板 / Dashboard</span>
+                <span class="tag">Tableau</span>
                 <span class="tag">PowerPoint</span>
+                <span class="tag">看板 / Dashboard</span>
                 <span class="tag">Figma / Canva</span>
                 <span class="tag">Jupyter</span>
                 <span class="tag">向业务翻译结论</span>
@@ -4113,57 +3643,59 @@
               </div>
             </div>
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">📈</span>
-                <span
-                  ><span class="i18n-zh">增长与运营</span><span class="i18n-en" lang="en">Growth &amp; ops</span></span
-                >
+              <h3>
+                <span class="i18n-zh">增长与运营</span
+                ><span class="i18n-en" lang="en">Growth &amp; ops</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">活动全流程</span>
-                <span class="tag tag--focus">SOP</span>
                 <span class="tag">用户增长</span>
                 <span class="tag">漏斗分析</span>
+                <span class="tag">活动全流程</span>
+                <span class="tag">招生活动</span>
                 <span class="tag">跨部门协同</span>
+                <span class="tag">SOP</span>
                 <span class="tag">KPI 拆解</span>
-                <span class="tag">A/B 测试</span>
+                <span class="tag">预算与排期</span>
+                <span class="tag">供应商/嘉宾对接</span>
+                <span class="tag">校园品牌活动</span>
               </div>
               <div class="meter">
-                <span class="i18n-zh">0→1 落地与规模化运营</span><span class="i18n-en" lang="en">Ship 0→1, then scale</span>
+                <span class="i18n-zh">0→1 与规模化</span><span class="i18n-en" lang="en">0-to-1 &amp; scale</span>
                 <div class="track"><div class="fill" style="width: 92%"></div></div>
               </div>
             </div>
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">📱</span>
-                <span
-                  ><span class="i18n-zh">内容与媒介</span><span class="i18n-en" lang="en">Content &amp; social</span></span
-                >
+              <h3>
+                <span class="i18n-zh">内容与媒介</span><span class="i18n-en" lang="en">Content &amp; social</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">社媒运营</span>
-                <span class="tag tag--focus">内容商业化</span>
-                <span class="tag">短视频 / 剪辑</span>
+                <span class="tag">社媒运营</span>
+                <span class="tag">短视频</span>
+                <span class="tag">剪映 / 剪辑</span>
                 <span class="tag">文案与脚本</span>
+                <span class="tag">多账号矩阵</span>
+                <span class="tag">数据复盘</span>
+                <span class="tag">内容商业化</span>
                 <span class="tag">A/B 内容实验</span>
+                <span class="tag">播客 / 口播</span>
               </div>
               <div class="meter">
-                <span class="i18n-zh">从创意到可量化结果；持续数据复盘</span
-                ><span class="i18n-en" lang="en">Creative → measurable; data-backed iteration</span>
+                <span class="i18n-zh">从创意到可量化结果</span
+                ><span class="i18n-en" lang="en">Creative → measurable</span>
                 <div class="track"><div class="fill" style="width: 90%"></div></div>
               </div>
             </div>
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">🤖</span>
-                <span><span class="i18n-zh">AI 与效率</span><span class="i18n-en" lang="en">AI &amp; productivity</span></span>
+              <h3>
+                <span class="i18n-zh">AI 与效率</span
+                ><span class="i18n-en" lang="en">AI &amp; productivity</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">大模型提示词</span>
-                <span class="tag tag--focus">工作流设计</span>
+                <span class="tag">大模型提示词</span>
                 <span class="tag">文献/资料摘要</span>
                 <span class="tag">邮件与文案草稿</span>
                 <span class="tag">自动化脚本</span>
+                <span class="tag">工作流设计</span>
                 <span class="tag">实验心态</span>
                 <span class="tag">隐私与合规意识</span>
               </div>
@@ -4174,17 +3706,15 @@
               </div>
             </div>
             <div class="card">
-              <h3 class="skill-card-h">
-                <span class="skill-card__icon" aria-hidden="true">🤝</span>
-                <span
-                  ><span class="i18n-zh">语言与协作</span><span class="i18n-en" lang="en">Language &amp; collab</span></span
-                >
+              <h3>
+                <span class="i18n-zh">语言与协作</span
+                ><span class="i18n-en" lang="en">Language &amp; collab</span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">英语工作语言</span>
-                <span class="tag tag--focus">跨时区沟通</span>
                 <span class="tag">中文母语</span>
+                <span class="tag">英语工作语言</span>
                 <span class="tag">IELTS 7.0 (7.5 S)</span>
+                <span class="tag">跨时区沟通</span>
                 <span class="tag">会议纪要</span>
                 <span class="tag">利益相关方管理</span>
                 <span class="tag">公开表达 / 主持</span>
@@ -4203,82 +3733,42 @@
       <section id="portfolio" class="section--alt" aria-labelledby="port-heading">
         <div class="wrap">
           <header class="section-head">
-            <p class="section-eyebrow" lang="en">PORTFOLIO</p>
+            <p class="section-eyebrow" lang="en">WORK &amp; CONTENT</p>
             <h2 id="port-heading">
               <span class="i18n-zh">内容运营作品</span><span class="i18n-en" lang="en">Content work</span>
             </h2>
-            <p class="sub i18n-zh">内容侧代表作提要；下方可查案例结构与数据锚点。</p>
-            <p class="sub i18n-en" lang="en">Highlights below—anchors for stories, screenshots, and numbers.</p>
+            <p class="sub i18n-zh">与线下 Portfolio 同线索：以卡片 + 符号呈现，也可改为真实截图/链接。</p>
+            <p class="sub i18n-en" lang="en"
+              >Aligned with the PDF narrative — icon cards for now; swap in screen captures or links when ready.</p
+            >
           </header>
           <div class="port-grid">
             <div class="port-item">
               <div class="port-icon" aria-hidden="true">◎</div>
               <div>
-                <div class="port-item__head">
-                  <span class="port-kpi i18n-zh" lang="zh-CN">0→1</span>
-                  <span class="port-kpi i18n-en" lang="en">0→1</span>
-                  <h3>
-                    <span class="i18n-zh" lang="zh-CN">7 个账号从 0 到 1 冷启动</span>
-                    <span class="i18n-en" lang="en">Seven accounts, 0→1 cold start</span>
-                  </h3>
-                </div>
-                <p>
-                  <span class="i18n-zh" lang="zh-CN">搭建多账号矩阵，完成账号定位与起量策略落地。</span>
-                  <span class="i18n-en" lang="en">Built a multi-account matrix; shipped positioning and growth playbooks.</span>
-                </p>
+                <h3>7 个账号从 0 到 1 冷启动</h3>
+                <p>多账号体系搭建、定位与起量策略。</p>
               </div>
             </div>
             <div class="port-item">
               <div class="port-icon" aria-hidden="true">▶</div>
               <div>
-                <div class="port-item__head">
-                  <span class="port-kpi i18n-zh" lang="zh-CN">100 万+</span>
-                  <span class="port-kpi i18n-en" lang="en">1M+ plays</span>
-                  <h3>
-                    <span class="i18n-zh" lang="zh-CN">累计播放 100 万+</span>
-                    <span class="i18n-en" lang="en">1M+ total plays</span>
-                  </h3>
-                </div>
-                <p>
-                  <span class="i18n-zh" lang="zh-CN">通过内容迭代与数据复盘，实现播放量持续增长。</span>
-                  <span class="i18n-en" lang="en"
-                    >Content iteration and data reviews that kept total watch time compounding.</span
-                  >
-                </p>
+                <h3>累计播放 80 万+</h3>
+                <p>内容迭代与数据复盘，持续放大有效供给。</p>
               </div>
             </div>
             <div class="port-item">
               <div class="port-icon" aria-hidden="true">✦</div>
               <div>
-                <div class="port-item__head">
-                  <span class="port-kpi i18n-zh" lang="zh-CN">1 万+</span>
-                  <span class="port-kpi i18n-en" lang="en">10K+ reads</span>
-                  <h3>
-                    <span class="i18n-zh" lang="zh-CN">单条内容破万阅读</span>
-                    <span class="i18n-en" lang="en">One post, 10K+ reads</span>
-                  </h3>
-                </div>
-                <p>
-                  <span class="i18n-zh" lang="zh-CN">通过选题与完播优化，打造高互动爆款内容。</span>
-                  <span class="i18n-en" lang="en">Topic and completion tuning for high-engagement breakout posts.</span>
-                </p>
+                <h3>单条内容破万阅读</h3>
+                <p>高互动内容的选题与完播优化经验。</p>
               </div>
             </div>
             <div class="port-item">
               <div class="port-icon" aria-hidden="true">$</div>
               <div>
-                <div class="port-item__head">
-                  <span class="port-kpi i18n-zh" lang="zh-CN">55% 高转化</span>
-                  <span class="port-kpi i18n-en" lang="en">55% high-conv</span>
-                  <h3>
-                    <span class="i18n-zh" lang="zh-CN">内容商业化案例</span>
-                    <span class="i18n-en" lang="en">Monetization case</span>
-                  </h3>
-                </div>
-                <p>
-                  <span class="i18n-zh" lang="zh-CN">搭建内容商业化闭环，提升高转化内容占比。</span>
-                  <span class="i18n-en" lang="en">Closed strategy–ship–review loops and raised high-converting mix.</span>
-                </p>
+                <h3>内容商业化案例</h3>
+                <p>高转化内容占比提升，策略-执行-复盘闭环。</p>
               </div>
             </div>
           </div>
@@ -4293,53 +3783,53 @@
               <span class="i18n-zh">对谈与共创 · Coffee Chat</span
               ><span class="i18n-en" lang="en">Conversation &amp; co-creation</span>
             </h2>
-            <div class="coffee-intro-block i18n-zh" lang="zh-CN">
-              <p class="sub">
-                欢迎聊<strong>职业规划、留学申请、运营增长、内容商业化</strong>，以及如何<strong>把 AI 带进工作流</strong>。<strong>下面几步</strong>是可预约的交流入口：<strong>先对齐背景与问题，再把下一步说清楚</strong>。
-              </p>
-              <p class="sub coffee-booking-intro__ttl"><strong>预约方式</strong></p>
-              <ul class="coffee-booking-intro__list">
-                <li>填下方表单留意向与时间偏好</li>
-                <li>我会按你选的会议方式回信 / 链</li>
-                <li>也可下滑用<strong>自助预约</strong>直接锁时段</li>
-              </ul>
-              <p class="sub coffee-demo-note" id="coffeeDemoNoteZh" hidden>
-                <strong>注：</strong>当前为演示状态，提交仅作测试，不会发送真实邮件。
-              </p>
-              <p class="sub coffee-cal-hint" id="coffeeCalHintZh" hidden></p>
-            </div>
-            <div class="coffee-intro-block i18n-en" lang="en">
-              <p class="sub">
-                Open to chat on <strong>career paths, admissions, growth &amp; ops, monetization,</strong> and
-                <strong>practical AI in real workflows</strong>—quick alignment and a clearer next step.
-              </p>
-              <p class="sub coffee-booking-intro__ttl"><strong>How to book</strong></p>
-              <ul class="coffee-booking-intro__list">
-                <li>Use the quick form below for intent + timing prefs.</li>
-                <li>I’ll reply with meeting details via your preferred tool.</li>
-                <li>Or scroll down to <strong>self-book</strong> when that’s enabled.</li>
-              </ul>
-              <p class="sub coffee-demo-note" id="coffeeDemoNoteEn" hidden>
-                <strong>Note:</strong> Demo mode—submits aren’t emailed yet.
-              </p>
-              <p class="sub coffee-cal-hint" id="coffeeCalHintEn" hidden></p>
-            </div>
+            <p class="sub i18n-zh" id="coffeeSubZh">
+              我期待这里是你我<strong>互相启发</strong>的入口：可聊职业与申请、数据与内容、产品灵感或
+              <strong>AI 如何进工作流</strong>。<strong>主流程是填写下方预约表</strong>，提交后内容会发到我为站点配置的信箱；我会回邮件，并以
+              <strong>Zoom、腾讯会议</strong> 或你在表里选择的偏好，发送会议信息（以邮件确认为准）。下方「可选」区可接 Cal/Calendly
+              让对方自助点选、并接 Zoom/Outlook 出日历与会议。
+            </p>
+            <p class="sub i18n-en" id="coffeeSubEn" lang="en">
+              A small <strong>door for two-way energy</strong>—career, data &amp; content, and <strong>AI in real
+              work</strong>. <strong>Primary path:</strong> use the <strong>request form below</strong>—on submit
+              the fields go to <strong>the inbox I set up</strong> (Formspree / similar). I’ll reply and share
+              a <strong>Zoom</strong> or <strong>Tencent Meeting</strong> link, matching your pick where possible. The
+              <strong>optional</strong> Cal/Calendly block can offer self-serve time slots and automatic calendar +
+              video links.
+            </p>
           </header>
           <div class="time-box" id="coffee-time-box">
-            <p id="timeBoxLine1z" class="i18n-zh"><strong>可沟通时间（参考）</strong></p>
-            <p id="timeBoxLine1e" class="i18n-en" lang="en"><strong>Availability (guide)</strong></p>
-            <p class="i18n-zh">周一至周五 · 20:00–23:00</p>
-            <p class="i18n-zh">周六 · 08:30–23:45</p>
-            <p class="i18n-zh">周日 · 08:30–23:00</p>
-            <p class="i18n-zh">时区：GMT+8（与 Calendly 常用工时对齐）</p>
-            <p class="i18n-en" lang="en">
-              Timezone GMT+8 (China / SG / Perth).<br />Mon–Fri: 20:00–23:00<br />Sat: 08:30–23:45<br />Sun:
-              08:30–23:00
+            <p id="timeBoxLine1z" class="i18n-zh">
+              <strong>我通常可沟通的时间（供参考；若仅走表单，最终以邮件/日历一致为准）</strong>
             </p>
-            <p class="i18n-zh" style="margin-top: 0.65rem">最终以邮件或日历确认为准。</p>
-            <p class="i18n-en" lang="en" style="margin-top: 0.65rem">Final slot by email / calendar invite.</p>
+            <p id="timeBoxLine1e" class="i18n-en" lang="en">
+              <strong>Typical hours (as a guide; if booking by form only, we confirm by email/calendar)</strong>
+            </p>
+            <p class="i18n-zh">周一～周五：19:00 - 23:00</p>
+            <p class="i18n-zh">周六～周日：10:00 - 21:00</p>
+            <p class="i18n-en" lang="en">Mon–Fri: 19:00–23:00 · Sat–Sun: 10:00–21:00 (align with your Cal/Calendly if used)</p>
           </div>
-          <div class="coffee-form-shell">
+          <div class="coffee-form-lead" id="coffee-form-lead" style="margin: 1.25rem 0 1rem">
+            <p class="sub i18n-zh" id="coffee-lead-zh" style="margin: 0 0 0.5rem">
+              请填写预约信息。提交后，系统会把<strong>姓名、联系邮箱、想聊内容、希望日期/时段、会议方式偏好</strong>一并发到我配置的邮箱。我无法在纯静态站里代你
+              <strong>自动在 Outlook 里建会</strong>，但会按你在表里选的
+              <strong>Zoom/腾讯会议</strong> 在客户端创建会议，并把链接通过<strong>回邮</strong>发给你；若你改用下方「自助选时」并已在
+              Cal 中连接 Zoom/Outlook，可自动生成日历邀请与会议。
+            </p>
+            <p class="sub i18n-en" id="coffee-lead-en" style="margin: 0 0 0.5rem" lang="en">
+              Your answers are emailed to the inbox I configure. I can’t auto-create a meeting in
+              <strong>Outlook from this static page</strong>—I’ll open <strong>Zoom or Tencent</strong> as you prefer, then
+              <strong>reply with the link</strong>. If you use the optional <strong>Cal/Calendly + Zoom/Office
+              365</strong> widget below, their flow can add calendar + conference automatically.
+            </p>
+            <p class="sub i18n-zh" id="coffee-endpoint-missing" style="display: none; margin: 0 0 0.5rem; color: var(--accent-2)">
+              在页面顶部把 <code>formSubmitUrl</code> 填为 Formspree 等提供的 POST 地址后，下表会真实投递；<strong>未填时提交仅为本机演示，邮件不会发出。</strong>
+            </p>
+            <p class="sub i18n-en" id="coffee-endpoint-missing-en" style="display: none" lang="en">
+              Set <code>formSubmitUrl</code> (e.g. Formspree) at the top of this file, or the submit is only a
+              <strong>local demo</strong> and nothing is delivered.
+            </p>
+          </div>
           <form class="form coffee-booking-form" id="coffeeForm" novalidate>
             <input
               type="text"
@@ -4350,160 +3840,110 @@
               style="position: absolute; left: -9000px; width: 1px; height: 1px; opacity: 0"
             />
             <div class="field">
-              <label for="c-name"
-                ><span class="i18n-zh">姓名 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Name <abbr class="field-req" title="Required">*</abbr></span></label
-              >
-              <input
-                id="c-name"
-                name="name"
-                type="text"
-                required
-                autocomplete="name"
-                data-ph-zh="如何称呼您"
-                data-ph-en="What should I call you?"
-              />
+              <label for="c-name"><span class="i18n-zh">姓名</span><span class="i18n-en" lang="en">Name</span></label>
+              <input id="c-name" name="name" type="text" required autocomplete="name" placeholder="Your name" />
             </div>
             <div class="field">
-              <label for="c-email"
-                ><span class="i18n-zh">联系邮箱 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Email <abbr class="field-req" title="Required">*</abbr></span></label
-              >
-              <input
-                id="c-email"
-                name="email"
-                type="email"
-                required
-                autocomplete="email"
-                data-ph-zh="用于回复与发送会议信息"
-                data-ph-en="For replies and meeting details"
-              />
+              <label for="c-email"><span class="i18n-zh">邮箱</span><span class="i18n-en" lang="en">Email</span></label>
+              <input id="c-email" name="email" type="email" required autocomplete="email" placeholder="you@email.com" />
             </div>
             <div class="field">
               <label for="c-topic"
-                ><span class="i18n-zh">想聊的话题 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en">Topic <abbr class="field-req" title="Required">*</abbr></span></label
+                ><span class="i18n-zh">想聊的话题</span><span class="i18n-en" lang="en">What to talk about</span></label
               >
               <select id="c-topic" name="topic" required>
-                <option value="" disabled selected data-zh-label="请选择话题" data-en-label="Pick a topic">请选择话题</option>
-                <option value="career" data-zh-label="职业规划" data-en-label="Career">职业规划</option>
-                <option value="school" data-zh-label="留学申请" data-en-label="Admissions">留学申请</option>
-                <option value="growth" data-zh-label="运营增长" data-en-label="Growth &amp; ops">运营增长</option>
-                <option value="content" data-zh-label="内容商业化" data-en-label="Content monetization">内容商业化</option>
-                <option value="ai" data-zh-label="AI 应用" data-en-label="Practical AI">AI 应用</option>
-                <option value="other" data-zh-label="其他" data-en-label="Other">其他</option>
+                <option value="" disabled selected>—</option>
+                <option value="ba">商业分析求职 / BA job search</option>
+                <option value="ops">运营与增长 / Ops &amp; growth</option>
+                <option value="content">内容冷启动与商业化 / Content 0-1 &amp; monetization</option>
+                <option value="school">留学申请 (WashU / MUST) / School apps</option>
+                <option value="cv">简历与面试 / Resume &amp; interview</option>
               </select>
+              <p class="i18n-en" style="font-size: 0.8rem; color: var(--text-muted); margin: 0.35rem 0 0" lang="en">
+                Options are bilingual in one list so nothing breaks when you switch language.
+              </p>
             </div>
             <div class="field">
               <label for="c-meeting"
-                ><span class="i18n-zh">希望使用的会议方式 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Meeting tool <abbr class="field-req" title="Required">*</abbr></span
-                ></label
+                ><span class="i18n-zh">希望使用的会议方式</span
+                ><span class="i18n-en" lang="en">Preferred meeting (video)</span></label
               >
               <select id="c-meeting" name="meeting" required>
-                <option value="" disabled selected data-zh-label="请选择" data-en-label="Choose">请选择</option>
+                <option value="" disabled selected>—</option>
                 <option value="zoom">Zoom</option>
-                <option value="tencent" data-zh-label="腾讯会议" data-en-label="Tencent Meeting">腾讯会议</option>
-                <option value="either" data-zh-label="均可" data-en-label="Either works">均可</option>
-                <option value="email" data-zh-label="先邮件对齐再约时间" data-en-label="Email first, then schedule"
-                  >先邮件对齐再约时间</option
-                >
+                <option value="tencent">腾讯会议 / Tencent</option>
+                <option value="either">均可 / No preference</option>
+                <option value="email">先邮件沟通再定会 / Email first</option>
               </select>
             </div>
             <div class="field">
               <label for="c-date"
-                ><span class="i18n-zh">希望沟通日期 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Preferred date <abbr class="field-req" title="Required">*</abbr></span
-                ></label
+                ><span class="i18n-zh">希望沟通日期</span><span class="i18n-en" lang="en">Preferred date</span></label
               >
               <input id="c-date" name="date" type="date" required />
             </div>
             <div class="field">
               <label for="c-slot"
-                ><span class="i18n-zh">偏好的小时段 <abbr class="field-req" title="必填">*</abbr></span
-                ><span class="i18n-en" lang="en"
-                  >Time window <abbr class="field-req" title="Required">*</abbr></span
-                ></label
+                ><span class="i18n-zh">偏好的小时段</span
+                ><span class="i18n-en" lang="en">Preferred time window</span></label
               >
               <select id="c-slot" name="slot" required>
-                <option value="" disabled selected data-zh-label="请选择时段" data-en-label="Pick a window"
-                  >请选择时段</option
-                >
-                <option data-zh-label="工作日 20:00–21:00" data-en-label="Weekdays · 20:00–21:00">工作日 20:00–21:00</option>
-                <option data-zh-label="工作日 21:00–22:00" data-en-label="Weekdays · 21:00–22:00">工作日 21:00–22:00</option>
-                <option data-zh-label="工作日 22:00–23:00" data-en-label="Weekdays · 22:00–23:00">工作日 22:00–23:00</option>
-                <option data-zh-label="周六 08:30–12:00" data-en-label="Sat · 08:30–12:00">周六 08:30–12:00</option>
-                <option data-zh-label="周六 12:00–15:00" data-en-label="Sat · 12:00–15:00">周六 12:00–15:00</option>
-                <option data-zh-label="周六 15:00–18:00" data-en-label="Sat · 15:00–18:00">周六 15:00–18:00</option>
-                <option data-zh-label="周六 18:00–21:00" data-en-label="Sat · 18:00–21:00">周六 18:00–21:00</option>
-                <option data-zh-label="周六 21:00–23:45" data-en-label="Sat · 21:00–23:45">周六 21:00–23:45</option>
-                <option data-zh-label="周日 08:30–12:00" data-en-label="Sun · 08:30–12:00">周日 08:30–12:00</option>
-                <option data-zh-label="周日 12:00–15:00" data-en-label="Sun · 12:00–15:00">周日 12:00–15:00</option>
-                <option data-zh-label="周日 15:00–18:00" data-en-label="Sun · 15:00–18:00">周日 15:00–18:00</option>
-                <option data-zh-label="周日 18:00–21:00" data-en-label="Sun · 18:00–21:00">周日 18:00–21:00</option>
-                <option data-zh-label="周日 21:00–23:00" data-en-label="Sun · 21:00–23:00">周日 21:00–23:00</option>
+                <option value="" disabled selected>—</option>
+                <option>19:00 - 20:00</option>
+                <option>20:00 - 21:00</option>
+                <option>21:00 - 22:00</option>
+                <option>22:00 - 23:00</option>
+                <option>10:00 - 12:00 (weekend)</option>
+                <option>12:00 - 15:00 (weekend)</option>
+                <option>15:00 - 18:00 (weekend)</option>
+                <option>18:00 - 21:00 (weekend)</option>
               </select>
             </div>
             <div class="field">
               <label for="c-msg"
-                ><span class="i18n-zh">补充说明（选填）</span
-                ><span class="i18n-en" lang="en">Notes (optional)</span></label
+                ><span class="i18n-zh">补充（选填）</span><span class="i18n-en" lang="en">Note (optional)</span></label
               >
               <textarea
                 id="c-msg"
                 name="message"
                 rows="3"
-                data-ph-zh="想聊的方向、已知背景或会议号（可选）"
-                data-ph-en="Context, agenda, or room link (optional)"
+                placeholder="Context so we can make the 30 min count, or a Tencent ID if needed."
               ></textarea>
             </div>
             <button type="submit" class="btn btn-primary" id="coffeeFormSubmit">
-              <span class="i18n-zh" id="coffeeBtnZh">提交预约</span
-              ><span class="i18n-en" id="coffeeBtnEn" lang="en">Submit</span>
+              <span class="i18n-zh" id="coffeeBtnZh">提交预约</span><span class="i18n-en" id="coffeeBtnEn" lang="en"
+                >Submit request</span
+              >
             </button>
           </form>
-          </div>
-          <details class="coffee-cal-optional" id="coffee-cal-optional" style="margin-top: 1.75rem; border: 1px solid var(--border); border-radius: var(--radius); padding: 0.95rem 1.15rem; background: var(--bg-elevated)">
+          <details class="coffee-cal-optional" id="coffee-cal-optional" style="margin-top: 1.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem 1rem; background: var(--bg-elevated)">
             <summary
               class="coffee-cal-optional__summary"
               id="cal-summary"
               style="font-weight: 600; cursor: pointer; list-style-position: outside"
             >
-              <span class="i18n-zh"
-                >可选 · 自助预约<span
-                  style="
-                    display: block;
-                    font-weight: 500;
-                    font-size: 0.88rem;
-                    color: var(--text-muted);
-                    margin-top: 0.3rem;
-                  "
-                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）</span
-                ></span
-              >
-              <span class="i18n-en" lang="en"
-                >Optional · self-book<span
-                  style="
-                    display: block;
-                    font-weight: 500;
-                    font-size: 0.88rem;
-                    color: var(--text-muted);
-                    margin-top: 0.3rem;
-                  "
-                  >Open slots inline or in a tab—calendar sync when connected.</span
-                ></span
-              >
+              <span class="i18n-zh">（可选）在日历里自助选时 — Cal / Calendly，可接 Zoom 与 Outlook</span
+              ><span class="i18n-en" lang="en">(Optional) Cal / Calendly self-booking — Zoom &amp; Outlook</span>
             </summary>
-            <div class="booking-hint" id="booking-setup-hint" style="margin-top: 0.85rem">
+            <div class="booking-hint" id="booking-setup-hint" style="margin-top: 0.75rem">
               <p class="i18n-zh" lang="zh-CN">
-                接好日历后，这里会显示可约表；也可单独用
-                <a href="https://cal.com" target="_blank" rel="noopener noreferrer">Cal.com</a> /
-                <a href="https://calendly.com" target="_blank" rel="noopener noreferrer">Calendly</a> 新开页。与表单可二选一或搭配。
+                若希望对方<strong>自己点选可约时间</strong>、并在你绑定的
+                <strong>Outlook/Google</strong> 上<strong>直接出现会议+Zoom 链接</strong>，可在
+                <a href="https://cal.com" target="_blank" rel="noopener noreferrer">Cal.com</a> 或
+                <a href="https://calendly.com" target="_blank" rel="noopener noreferrer">Calendly</a> 中创建 15–30
+                分钟活动，在后台将 <strong>Zoom/Teams</strong> 设为会议位置，在 Availability
+                里与上方面板时间对齐。将 Embed 的 <code>src</code> 填到 <code>window.APRIL_BOOKING.embedUrl</code> 并保存刷新。
+                内嵌为空白时试 <code>openInNewTabUrl</code> 新窗打开。腾讯会议多数情况下需在<strong>发邮件/手动分享会议号</strong>，与
+                Cal 的「一站式」不冲突。
               </p>
-              <p class="i18n-en" lang="en" style="margin-top: 0.45rem">
-                Wire your calendar here, or link out to Cal / Calendly—use solo or alongside the form.
+              <p class="i18n-en" lang="en" style="margin-top: 0.5rem">
+                For <strong>self-serve slot picking</strong> and automatic <strong>Zoom + calendar events</strong>, create an
+                event in <a href="https://cal.com" target="_blank" rel="noopener noreferrer">Cal.com</a> or
+                <a href="https://calendly.com" target="_blank" rel="noopener noreferrer">Calendly</a>, connect
+                <strong>Zoom/Teams</strong> and your <strong>Office 365/Outlook</strong> calendar, then paste the embed
+                <code>src</code> into <code>embedUrl</code> (or use <code>openInNewTabUrl</code>). <strong>Tencent
+                Meeting</strong> is often shared <strong>manually</strong> after email—the form + reply flow still
+                works.
               </p>
             </div>
             <div class="booking-embed-block" id="booking-embed-block" hidden>
@@ -4514,12 +3954,10 @@
               <div class="booking-iframe-wrap">
                 <iframe
                   id="booking-iframe"
-                  class="booking-live-iframe"
                   title="Book a time — Coffee chat"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                   allow="camera; microphone; fullscreen; payment"
-                  hidden
                 ></iframe>
               </div>
               <p class="booking-embed-foot" id="booking-embed-link-wrap" hidden>
@@ -4540,10 +3978,10 @@
                 ><span class="i18n-en" lang="en">Complete booking in a new tab</span>
               </h3>
               <p class="sub i18n-zh" style="margin-top: 0; margin-bottom: 1rem">
-                已指向预约页。选好时段后，由平台跟进邮件与日历邀请（接了 Zoom 会一并带出）。
+                已配置链至 Cal/Calendly 的地址。点按钮选择时段，由平台处理空档、邮件、日历与（若已接）视频会议。
               </p>
               <p class="sub i18n-en" style="margin-top: 0; margin-bottom: 1rem" lang="en">
-                Booking link is live—the app sends slots, emails, calendar, and Zoom if linked.
+                Your booking link is set. The app handles free slots, emails, and calendar (and Zoom if you connected it).
               </p>
               <a
                 class="btn btn-primary"
@@ -4563,45 +4001,41 @@
     <footer class="site-footer" role="contentinfo">
       <div class="wrap">
         <p class="name">赵梓淇 · APRIL ZHAO</p>
-        <p class="site-footer__slogan i18n-zh" lang="zh-CN">数据让增长有迹可循，创意让内容破圈传播</p>
-        <p class="site-footer__slogan i18n-en" lang="en">Data for traceable growth — creative stories that break through</p>
-        <div class="site-footer__contact">
-          <p class="i18n-zh" lang="zh-CN">
-            电话 (86) 185-0636-7736 <span class="site-footer__sep" aria-hidden="true">|</span> 校邮
-            <a href="mailto:april.zhao@wustl.edu">april.zhao@wustl.edu</a>
-          </p>
-          <p class="i18n-zh" lang="zh-CN">
-            长期邮箱 <a href="mailto:18506367736@163.com">18506367736@163.com</a>
-          </p>
-          <p class="i18n-en" lang="en">
-            (86) 185-0636-7736 <span class="site-footer__sep" aria-hidden="true">|</span>
-            <a href="mailto:april.zhao@wustl.edu">april.zhao@wustl.edu</a>
-            <span class="site-footer__sep" aria-hidden="true">|</span>
-            <a href="mailto:18506367736@163.com">18506367736@163.com</a>
-          </p>
-        </div>
-        <nav class="site-footer__social" aria-label="社交链接">
-          <p class="site-footer__social-row i18n-zh" lang="zh-CN">
-            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">领英</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">小红书</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">哔哩哔哩</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
-          </p>
-          <p class="site-footer__social-row i18n-en" lang="en">
-            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">LinkedIn</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">Xiaohongshu</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">Bilibili</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
-          </p>
-        </nav>
-        <p class="site-footer__copyright i18n-zh" lang="zh-CN">© <span class="js-year"></span> 赵梓淇</p>
-        <p class="site-footer__copyright i18n-en" lang="en">© <span class="js-year"></span> April Zhao</p>
+        <p class="site-footer__slogan i18n-zh" lang="zh-CN">数据让增长有迹可循 创意让内容破圈传播</p>
+        <p class="site-footer__slogan i18n-en" lang="en">Data for traceable growth Creative stories that break through</p>
+        <p>
+          <span class="i18n-zh">电话 (86) 185-0636-7736 校邮</span
+          ><span class="i18n-en" lang="en">Phone (86) 185-0636-7736 School</span>
+          <a href="mailto:april.zhao@wustl.edu">april.zhao@wustl.edu</a>
+        </p>
+        <p>
+          <span class="i18n-zh">长期邮箱</span><span class="i18n-en" lang="en"> Personal</span>
+          <a href="mailto:18506367736@163.com">18506367736@163.com</a>
+        </p>
+        <p class="site-footer__social" aria-label="社交链接">
+          <span class="i18n-zh site-footer__social-row" lang="zh-CN">
+            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">领英</a>
+            <a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">小红书</a>
+            <a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">哔哩哔哩</a>
+            <a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
+          </span>
+          <span class="i18n-en site-footer__social-row" lang="en">
+            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">Xiaohongshu</a>
+            <a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">Bilibili</a>
+            <a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
+          </span>
+        </p>
+        <p class="site-footer__colophon i18n-zh" lang="zh-CN">
+          首屏肖像是风格化处理作品；更换请替换 <code>images/portrait.png</code>。SEO 已配置页面标题与
+          <code>meta name=&quot;description&quot;</code>，可按求职/合作向微调措辞。
+        </p>
+        <p class="site-footer__colophon i18n-en" lang="en">
+          The hero image is stylized; replace <code>images/portrait.png</code> to update. Title and meta description are
+          set for sharing—tune the copy for your audience.
+        </p>
+        <p class="i18n-zh">© <span class="js-year"></span> 赵梓淇. 保留所有权利.</p>
+        <p class="i18n-en" lang="en">© <span class="js-year"></span> April Zhao. All rights reserved.</p>
       </div>
     </footer>
 
@@ -4612,12 +4046,12 @@
             <span class="i18n-zh">已记录（本机演示）</span><span class="i18n-en" lang="en">Noted (local demo)</span>
           </h3>
           <p class="i18n-zh" lang="zh-CN">
-            这是一次演示提交，信息没有发到邮箱。正式上线后表单会投递到我配置的收件箱；你也可以发邮件至
-            april.zhao@wustl.edu，或使用下方自助预约入口。
+            这是本机假提交。请在 <code>APRIL_BOOKING.formSubmitUrl</code> 中填写 Formspree 等地址后再试；或发邮件到
+            april.zhao@wustl.edu、或使用下方可展开的 Cal/Calendly。
           </p>
           <p class="i18n-en" lang="en">
-            Nothing was delivered in this demo. When the site is connected, submissions go to my inbox—or email
-            april.zhao@wustl.edu, or open the optional self-booking block below.
+            Nothing was sent. Set <code>formSubmitUrl</code> in <code>APRIL_BOOKING</code>, or email
+            april.zhao@wustl.edu, or use the optional Cal/Calendly block below.
           </p>
         </div>
         <div id="okModalModeSent" class="ok-modal-mode" hidden>
@@ -4625,13 +4059,12 @@
             <span class="i18n-zh">已发出</span><span class="i18n-en" lang="en">Message sent</span>
           </h3>
           <p class="i18n-zh" lang="zh-CN">
-            表单已投递。请到邮箱查看（含垃圾箱）；若这是你第一次用 FormSubmit，请先到来自 FormSubmit 的邮件里<strong>激活表单</strong>，否则会一直转不到收件箱。
-            我会按你选的会议方式回邮；若你已用下方 Calendly 约成时间，以日历邀请为准。
+            已上送。请在本站所配邮箱中查看。我会按你选择的会议方式回邮（含 Zoom/腾讯会议 链接）；若用 Cal+Zoom
+            已自助约成，以日历邀请为准。
           </p>
           <p class="i18n-en" lang="en">
-            Posted—check inbox and spam. If this is your first FormSubmit form, click the activation link in their email
-            or confirmations won’t go through. I’ll reply using your preferred meeting tool; if you booked via Calendly below,
-            follow that calendar invite.
+            Posted. I’ll use your preferred platform in the form to reply (Zoom, Tencent, etc.) If you also booked via
+            Cal/Calendly, follow that calendar event.
           </p>
         </div>
         <button type="button" class="btn btn-primary" id="okClose">
@@ -4748,112 +4181,26 @@
               var btn = form.querySelector('button[type="submit"]');
               if (btn) btn.disabled = true;
               var fd = new FormData(form);
-              var honey = fd.get("_gotcha");
-              if (honey && String(honey).trim()) {
-                if (btn) btn.disabled = false;
-                return;
-              }
               var subj = (book.formEmailSubject && String(book.formEmailSubject).trim()) || "个人站：Coffee chat 意向";
-              var ccEmail =
-                book.formSubmitCc && String(book.formSubmitCc).trim();
               fd.set("_subject", subj);
-              var formsubmitAjax = /^https:\/\/formsubmit\.co\/ajax\//i.test(postUrl);
-              var isGoogleAppsScript = /script\.google\.com\/macros\//i.test(postUrl);
-              if (ccEmail && !formsubmitAjax) {
-                fd.set("_cc", ccEmail);
-              }
-              if (isGoogleAppsScript) {
-                var gasSecret =
-                  book.googleAppsScriptFormSecret && String(book.googleAppsScriptFormSecret).trim();
-                var params = new URLSearchParams();
-                fd.forEach(function (v, k) {
-                  if (k === "_gotcha") return;
-                  params.append(k, String(v));
-                });
-                params.set("_subject", subj);
-                try {
-                  params.set("submitted_from", typeof location !== "undefined" ? location.href : "");
-                } catch (e1) {}
-                if (gasSecret) params.set("form_secret", gasSecret);
-                fetch(postUrl, {
-                  method: "POST",
-                  mode: "no-cors",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: params.toString(),
-                  referrerPolicy: "unsafe-url",
-                })
-                  .then(function () {
-                    setModal(true, "sent");
-                    form.reset();
-                    syncCoffeeFormStrings(getLocale());
-                  })
-                  .catch(function () {
-                    window.alert(
-                      getLocale() === "en"
-                        ? "Could not send just now—please retry or email me directly."
-                        : "发送暂时失败，请稍后重试，或直接发邮件联系。"
-                    );
-                  })
-                  .finally(function () {
-                    if (btn) btn.disabled = false;
-                  });
-                return;
-              }
-              var fetchInit = formsubmitAjax
-                ? (function () {
-                    var payload = {};
-                    fd.forEach(function (v, k) {
-                      if (k === "_gotcha") return;
-                      payload[k] = v;
-                    });
-                    payload._subject = subj;
-                    if (payload.email) payload._replyto = payload.email;
-                    payload._template = "table";
-                    payload._captcha = false;
-                    payload.submitted_from =
-                      typeof location !== "undefined" ? location.href : "";
-                    if (ccEmail) payload._cc = ccEmail;
-                    return {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json", Accept: "application/json" },
-                      body: JSON.stringify(payload)
-                    };
-                  })()
-                : { method: "POST", body: fd, headers: { Accept: "application/json" } };
-              fetch(postUrl, Object.assign({ referrerPolicy: "unsafe-url" }, fetchInit))
+              fetch(postUrl, {
+                method: "POST",
+                body: fd,
+                headers: { Accept: "application/json" }
+              })
                 .then(function (res) {
-                  return res.text().then(function (t) {
-                    var obj = {};
-                    try {
-                      obj = t ? JSON.parse(t) : {};
-                    } catch (ignored) {}
-                    return { ok: res.ok, json: obj, text: t };
-                  });
+                  if (!res.ok) throw new Error("form post failed");
+                  return res.json().catch(function () { return {}; });
                 })
-                .then(function (ret) {
-                  if (formsubmitAjax && ret.json && "success" in ret.json) {
-                    var s = ret.json.success;
-                    if (s !== true && s !== "true") {
-                      window.alert(
-                        ret.json.message ||
-                          (getLocale() === "en"
-                            ? "The form backend did not accept this submission."
-                            : "表单服务未受理本次提交（请根据提示处理后重试）。")
-                      );
-                      return;
-                    }
-                  } else if (!ret.ok) {
-                    throw new Error("form post failed");
-                  }
+                .then(function () {
                   setModal(true, "sent");
                   form.reset();
-                  syncCoffeeFormStrings(getLocale());
                 })
                 .catch(function () {
                   window.alert(
                     getLocale() === "en"
-                      ? "Could not send just now—please retry or email me directly."
-                      : "发送暂时失败，请稍后重试，或直接发邮件联系。"
+                      ? "Could not send. Check the endpoint, try email, or try again later."
+                      : "发送失败：请检查 formSubmitUrl 或稍后用邮件联系。"
                   );
                 })
                 .finally(function () {
@@ -4862,7 +4209,6 @@
             } else {
               setModal(true, "demo");
               form.reset();
-              syncCoffeeFormStrings(getLocale());
             }
           });
         }
@@ -4881,24 +4227,6 @@
         function getLocale() {
           return document.body.getAttribute("data-locale") === "en" ? "en" : "zh";
         }
-        function syncCoffeeFormStrings(loc) {
-          var zh = loc !== "en";
-          var formEl = document.getElementById("coffeeForm");
-          if (!formEl) return;
-          formEl.querySelectorAll("[data-ph-zh][data-ph-en]").forEach(function (el) {
-            var p = zh ? el.getAttribute("data-ph-zh") : el.getAttribute("data-ph-en");
-            if (p) el.setAttribute("placeholder", p);
-          });
-          formEl.querySelectorAll("select").forEach(function (sel) {
-            Array.prototype.forEach.call(sel.options, function (opt) {
-              var z = opt.getAttribute("data-zh-label");
-              var e = opt.getAttribute("data-en-label");
-              if (z != null && e != null && z !== "" && e !== "") {
-                opt.textContent = zh ? z : e;
-              }
-            });
-          });
-        }
         function applyLocale(loc) {
           document.body.setAttribute("data-locale", loc);
           document.documentElement.setAttribute("lang", loc === "en" ? "en" : "zh-CN");
@@ -4911,16 +4239,6 @@
             b.textContent = loc === "en" ? "中文" : "EN";
             b.setAttribute("title", loc === "en" ? "Switch to Chinese" : "Switch to English");
             b.setAttribute("aria-label", loc === "en" ? "Switch to Chinese" : "切换到英文");
-          }
-          syncCoffeeFormStrings(loc);
-          var tw = document.querySelector(".nav-translate-wrap");
-          if (tw) {
-            tw.setAttribute(
-              "title",
-              loc === "en"
-                ? "For this site’s own copy, use 中文 / EN. This dropdown is Google page translate (extra languages · online)."
-                : "本站排版与文案请点「中/EN」；此处为 Google 网页翻译（更多语种 · 需联网）。"
-            );
           }
         }
         var savedLoc = "zh";
@@ -4993,16 +4311,14 @@
           }
         })();
         var cfg = window.APRIL_BOOKING || {};
-        var formSubmitUrl = (cfg.formSubmitUrl && String(cfg.formSubmitUrl).trim()) || "";
         var embedBlock = document.getElementById("booking-embed-block");
         var linkOnlyBlock = document.getElementById("booking-link-only");
         var linkOnlyBtn = document.getElementById("booking-link-only-btn");
         var setupHint = document.getElementById("booking-setup-hint");
         var bookingIframe = document.getElementById("booking-iframe");
-        var demoNoteZh = document.getElementById("coffeeDemoNoteZh");
-        var demoNoteEn = document.getElementById("coffeeDemoNoteEn");
-        var calHintZh = document.getElementById("coffeeCalHintZh");
-        var calHintEn = document.getElementById("coffeeCalHintEn");
+        var coffeeSubZh = document.getElementById("coffeeSubZh");
+        var coffeeSubEn = document.getElementById("coffeeSubEn");
+        var timeBox = document.getElementById("coffee-time-box");
         var timeBoxLine1z = document.getElementById("timeBoxLine1z");
         var timeBoxLine1e = document.getElementById("timeBoxLine1e");
         var linkWrap = document.getElementById("booking-embed-link-wrap");
@@ -5011,84 +4327,33 @@
         var embedTitleZh = document.querySelector("#booking-embed-title .i18n-zh");
         var embedTitleEn = document.querySelector("#booking-embed-title .i18n-en");
 
-        function hideCalHints() {
-          if (calHintZh) {
-            calHintZh.hidden = true;
-            calHintZh.textContent = "";
-          }
-          if (calHintEn) {
-            calHintEn.hidden = true;
-            calHintEn.textContent = "";
-          }
-        }
-
-        function setDemoNotes(show) {
-          if (demoNoteZh) demoNoteZh.hidden = !show;
-          if (demoNoteEn) demoNoteEn.hidden = !show;
-        }
-
-        function calendlyEmbedIframeSrc(scheduleUrl) {
-          try {
-            var raw = scheduleUrl.trim();
-            var u = new URL(raw.indexOf("//") !== -1 ? raw : "https://" + raw);
-            var domain =
-              typeof location !== "undefined" && location.hostname
-                ? location.hostname
-                : "localhost";
-            u.searchParams.set("embed_domain", domain);
-            u.searchParams.set("embed_type", "Inline");
-            return u.toString();
-          } catch (err) {
-            return scheduleUrl;
-          }
-        }
-
         var embedUrl = cfg.embedUrl && String(cfg.embedUrl).trim();
-        var calendlyUrl = cfg.calendlyInlineUrl && String(cfg.calendlyInlineUrl).trim();
-        var hasCalendly = Boolean(calendlyUrl);
-        var hasIframeEmbed = Boolean(embedUrl);
-        var hasEmbed = hasCalendly || hasIframeEmbed;
         var openTab = cfg.openInNewTabUrl && String(cfg.openInNewTabUrl).trim();
+        var hasEmbed = Boolean(embedUrl);
         var hasTabOnly = Boolean(!hasEmbed && openTab);
-        var tabUrl = openTab || calendlyUrl || embedUrl || "";
+        var tabUrl = openTab || embedUrl || "";
 
-        setDemoNotes(!formSubmitUrl);
-
-        if (hasEmbed && embedBlock) {
-          embedBlock.hidden = false;
+        if (hasEmbed && bookingIframe) {
+          bookingIframe.src = embedUrl;
+          if (embedBlock) embedBlock.hidden = false;
           if (linkOnlyBlock) linkOnlyBlock.hidden = true;
           if (setupHint) setupHint.hidden = true;
-          if (calHintZh) {
-            calHintZh.hidden = false;
-            calHintZh.textContent = formSubmitUrl
-              ? "下方已内嵌日历，可直接选时段；上方表单也会投递到我邮箱，可搭配使用。"
-              : "下方已内嵌日历，可直接点选可约时间。";
+          if (coffeeSubZh) {
+            coffeeSubZh.innerHTML =
+              "主流程仍是<strong>上方预约表</strong>。下方已内嵌 <strong>Cal/Calendly</strong> 时，对方可自助点选、并与绑定日历和 <strong>Zoom/Outlook</strong> 同步。表格提交也会发到我邮箱，可与自助约并存。";
           }
-          if (calHintEn) {
-            calHintEn.hidden = false;
-            calHintEn.textContent = formSubmitUrl
-              ? "Calendar is embedded below; the form also reaches my inbox when enabled—use either or both."
-              : "Calendar is embedded below—pick an open slot.";
+          if (coffeeSubEn) {
+            coffeeSubEn.innerHTML =
+              "The <strong>form above</strong> is still the main path. A <strong>Cal/Calendly</strong> live embed is below—self-serve times with your connected calendar and <strong>Zoom/Outlook</strong>. The form can still email me in parallel if you set <code>formSubmitUrl</code>.";
           }
           if (timeBoxLine1z) {
-            timeBoxLine1z.innerHTML = "<strong>可沟通时间（与日历展示一致）</strong>";
+            timeBoxLine1z.innerHTML = "<strong>对外公布的可聊时段（与 Cal 中规则一致）</strong>";
           }
           if (timeBoxLine1e) {
-            timeBoxLine1e.innerHTML = "<strong>Hours (match the calendar below)</strong>";
+            timeBoxLine1e.innerHTML = "<strong>Published hours (match in Cal/Calendly)</strong>";
           }
           if (embedTitleZh) embedTitleZh.textContent = "选择时段（已连接）";
-          if (embedTitleEn) embedTitleEn.textContent = "Pick a time";
-
-          if (hasCalendly && bookingIframe) {
-            bookingIframe.classList.add("booking-live-iframe");
-            bookingIframe.hidden = false;
-            bookingIframe.src = calendlyEmbedIframeSrc(calendlyUrl);
-          } else if (hasIframeEmbed && bookingIframe) {
-            bookingIframe.classList.add("booking-live-iframe");
-            bookingIframe.hidden = false;
-            bookingIframe.src = embedUrl;
-          }
-
+          if (embedTitleEn) embedTitleEn.textContent = "Real calendar";
           if (openExt && tabUrl) {
             openExt.href = tabUrl;
             if (linkWrap) linkWrap.hidden = false;
@@ -5099,17 +4364,13 @@
           linkOnlyBlock.hidden = false;
           if (embedBlock) embedBlock.hidden = true;
           if (setupHint) setupHint.hidden = true;
-          if (calHintZh) {
-            calHintZh.hidden = false;
-            calHintZh.textContent = formSubmitUrl
-              ? "下方按钮可打开预约页选时段；上方表单亦会发到邮箱，可搭配使用。"
-              : "下方按钮可打开预约页，查看可约时间。";
+          if (coffeeSubZh) {
+            coffeeSubZh.innerHTML =
+              "主流程是<strong>上方预约表</strong>。已配置<strong>新窗预约页</strong>在下方可展开，选时段后由平台发提醒；表格提交亦会到我邮箱。";
           }
-          if (calHintEn) {
-            calHintEn.hidden = false;
-            calHintEn.textContent = formSubmitUrl
-              ? "Use the button below for an external booking page; the form also posts when enabled."
-              : "Use the button below to open booking in a new tab.";
+          if (coffeeSubEn) {
+            coffeeSubEn.innerHTML =
+              "Main path: the <strong>form above</strong>. A <strong>new-tab</strong> Cal link is in the <strong>optional</strong> block below. The form can still post to my inbox with <code>formSubmitUrl</code>.";
           }
           if (calOptional) calOptional.open = true;
         } else {
@@ -5117,7 +4378,41 @@
           if (linkOnlyBlock) linkOnlyBlock.hidden = true;
           if (setupHint) setupHint.hidden = false;
           if (calOptional) calOptional.open = false;
-          hideCalHints();
+        }
+
+        var formSubmitUrl = (cfg.formSubmitUrl && String(cfg.formSubmitUrl).trim()) || "";
+        var missZ = document.getElementById("coffee-endpoint-missing");
+        var missE = document.getElementById("coffee-endpoint-missing-en");
+        var bzh = document.getElementById("coffeeBtnZh");
+        var ben = document.getElementById("coffeeBtnEn");
+        if (!formSubmitUrl) {
+          if (missZ) missZ.style.display = "block";
+          if (missE) missE.style.display = "block";
+          if (bzh) bzh.textContent = "提交（本机演示）";
+          if (ben) ben.textContent = "Submit (local demo)";
+        } else {
+          if (missZ) missZ.style.display = "none";
+          if (missE) missE.style.display = "none";
+          if (bzh) bzh.textContent = "提交预约";
+          if (ben) ben.textContent = "Submit request";
+        }
+        if (formSubmitUrl) {
+          if (hasEmbed && coffeeSubZh) {
+            coffeeSubZh.innerHTML =
+              "主流程是<strong>上方预约表</strong>（已可投递邮箱）。内嵌 <strong>Cal/Calendly</strong> 在可展开区；需自助选时与自动 Zoom/Outlook 会议可往下展开。";
+          }
+          if (hasEmbed && coffeeSubEn) {
+            coffeeSubEn.innerHTML =
+              "The <strong>form above is live</strong> to your inbox. A <strong>Cal/Calendly</strong> block is in the <strong>optional</strong> section for self-serve and Zoom/Outlook if you set <code>embedUrl</code>.";
+          }
+          if (hasTabOnly && coffeeSubZh) {
+            coffeeSubZh.innerHTML =
+              "主流程是<strong>上方预约表</strong>。<strong>新窗 Cal</strong> 在可展开区；与表单投递可同时使用。";
+          }
+          if (hasTabOnly && coffeeSubEn) {
+            coffeeSubEn.innerHTML =
+              "Main path: the <strong>form above</strong> (posts to your inbox). <strong>Cal/Calendly</strong> in the optional block opens in a new tab.";
+          }
         }
         (function baiduCcfCaption() {
           var ccf = window.APRIL_BAIDU_CCF || {};
@@ -5128,13 +4423,21 @@
           for (var fi = 0; fi < files.length; fi++) {
             if (String(files[fi]).trim()) n += 1;
           }
-          var zhBase = "活动现场实拍：包含主舞台、嘉宾合影、签到区等环节";
-          var enBase = "On-site photos: main stage, group shots, check-in, and more.";
           if (capZh) {
-            capZh.textContent = n > 0 ? zhBase + "（共 " + n + " 张）" : zhBase + "。";
+            capZh.innerHTML =
+              n > 0
+                ? "以下为 CCF（中国计算机学会）相关活动照片；<strong>当前共 " +
+                  n +
+                  " 张</strong>。顺序以页首 <code>APRIL_BAIDU_CCF</code> 为准。宽屏<strong>一行五张</strong>。点击可在新标签页打开。图片路径已写在 <code>index.html</code> 图区，文件放在 <code>images/</code> 下；换图时覆盖同名 <code>intern-baidu-*.jpg</code> 后强刷。"
+                : "未配置照片：请在 &lt;head&gt; 的 <code>window.APRIL_BAIDU_CCF.files</code> 中填写 <code>images/</code> 下的文件名。";
           }
           if (capEn) {
-            capEn.textContent = n > 0 ? enBase + " (" + n + " images.)" : enBase;
+            capEn.innerHTML =
+              n > 0
+                ? "CCF event photos. <strong>" +
+                  n +
+                  " items</strong> — order follows <code>APRIL_BAIDU_CCF.files</code> at the top. Five per row on wide (e.g. 2×5 for ten). Thumbnails are static in the HTML. Click to open in a new tab."
+                : "No files listed. Set <code>window.APRIL_BAIDU_CCF.files</code> in the page head.";
           }
         })();
       })();
