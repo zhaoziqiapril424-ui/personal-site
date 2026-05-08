@@ -680,25 +680,25 @@
         position: relative;
         overflow: hidden;
       }
-      @keyframes hero-bg-studio-drift {
+      @keyframes hero-bg-garden-drift {
         0%,
         100% {
           transform: translateY(-50%) rotate(-90deg) translate3d(0, 0, 0);
         }
         50% {
-          transform: translateY(-50%) rotate(-90deg) translate3d(8px, -8px, 0);
+          transform: translateY(-50%) rotate(-90deg) translate3d(4px, -6px, 0);
         }
       }
-      /* 固定在视口最左侧（避让安全区），不与内容区抢同一套计算 */
+      /* 竖排锚定在左侧留白区（以左侧为旋转轴），避免甩到画框底下 */
       .hero::after {
-        content: "OPEN STUDIO";
+        content: "DIGITAL GARDEN";
         position: absolute;
-        left: max(10px, env(safe-area-inset-left, 0px));
+        left: max(12px, env(safe-area-inset-left, 0px));
         right: auto;
         top: 48%;
         transform: translateY(-50%) rotate(-90deg);
-        transform-origin: center center;
-        font-size: clamp(2rem, 5vw, 3.4rem);
+        transform-origin: left center;
+        font-size: clamp(1.55rem, 3.5vw, 2.65rem);
         font-weight: 700;
         font-style: italic;
         letter-spacing: 0.14em;
@@ -709,7 +709,7 @@
         line-height: 1;
         white-space: nowrap;
         user-select: none;
-        animation: hero-bg-studio-drift 32s ease-in-out infinite;
+        animation: hero-bg-garden-drift 32s ease-in-out infinite;
       }
       @media (prefers-reduced-motion: reduce) {
         .hero::after {
@@ -2965,7 +2965,7 @@
             </div>
           </figure>
           <div class="hero__main">
-            <p class="kicker"><span lang="en">DIGITAL STUDIO · OPEN STUDIO</span></p>
+            <p class="kicker"><span lang="en">BETA SPACE : OPEN ACCESS</span></p>
             <h1>
               <span class="h1__name">赵梓淇</span>
               <span class="h1__en" lang="en">April Zhao</span>
