@@ -686,17 +686,22 @@
           transform: translateY(-50%) rotate(-90deg) translate3d(0, 0, 0);
         }
         50% {
-          transform: translateY(-50%) rotate(-90deg) translate3d(12px, -10px, 0);
+          transform: translateY(-50%) rotate(-90deg) translate3d(8px, -8px, 0);
         }
       }
+      /* 竖排在头像列与右侧卡片之间的主栏空隙，避免压在肖像或话题卡片下 */
       .hero::after {
         content: "OPEN STUDIO";
         position: absolute;
-        left: clamp(8px, 2.5vw, 36px);
+        left: clamp(
+          calc((100vw - min(1100px, 92vw)) / 2 + min(200px, 34vw) + 0.5rem),
+          calc((100vw - min(1100px, 92vw)) / 2 + min(280px, 31vw) + 1.85rem + 0.65rem),
+          calc(100vw - (100vw - min(1100px, 92vw)) / 2 - min(302px, 32vw) - 1.35rem)
+        );
         right: auto;
         top: 48%;
         transform: translateY(-50%) rotate(-90deg);
-        font-size: clamp(2.35rem, 8vw, 4rem);
+        font-size: clamp(1.85rem, 4vw, 3.15rem);
         font-weight: 700;
         font-style: italic;
         letter-spacing: 0.14em;
@@ -711,8 +716,24 @@
       }
       @media (max-width: 1060px) and (min-width: 701px) {
         .hero::after {
-          top: 26%;
-          left: clamp(8px, 3vw, 28px);
+          top: clamp(5.25rem, 15vh, 7rem);
+          left: clamp(
+            calc((100vw - min(1100px, 92vw)) / 2 + min(190px, 42vw) + 0.5rem),
+            calc((100vw - min(1100px, 92vw)) / 2 + min(260px, 44vw) + 1rem),
+            calc(100vw - (100vw - min(1100px, 92vw)) / 2 - min(280px, 40vw) - 1rem)
+          );
+          transform: translateY(0) rotate(-90deg);
+          transform-origin: left center;
+          animation: hero-bg-studio-drift-tablet 28s ease-in-out infinite;
+        }
+      }
+      @keyframes hero-bg-studio-drift-tablet {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-90deg) translate3d(0, 0, 0);
+        }
+        50% {
+          transform: translateY(0) rotate(-90deg) translate3d(6px, -6px, 0);
         }
       }
       @media (prefers-reduced-motion: reduce) {
