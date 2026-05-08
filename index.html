@@ -686,18 +686,18 @@
           transform: translateY(-50%) rotate(-90deg) translate3d(0, 0, 0);
         }
         50% {
-          transform: translateY(-50%) rotate(-90deg) translate3d(4px, -6px, 0);
+          transform: translateY(-50%) rotate(-90deg) translate3d(0, -8px, 0);
         }
       }
-      /* 竖排锚定在左侧留白区（以左侧为旋转轴），避免甩到画框底下 */
+      /* 左侧留白内完整可见：center 旋转 + 适度 inset，避免 origin:left 把半边甩出视口 */
       .hero::after {
         content: "DIGITAL GARDEN";
         position: absolute;
-        left: max(12px, env(safe-area-inset-left, 0px));
+        left: max(1.75rem, calc(env(safe-area-inset-left, 0px) + 1.35rem));
         right: auto;
         top: 48%;
         transform: translateY(-50%) rotate(-90deg);
-        transform-origin: left center;
+        transform-origin: center center;
         font-size: clamp(1.55rem, 3.5vw, 2.65rem);
         font-weight: 700;
         font-style: italic;
