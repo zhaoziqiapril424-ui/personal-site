@@ -18,7 +18,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -106,6 +106,7 @@
         --grad-card-border: linear-gradient(135deg, #2f4f4f, #b8860b);
         --font-sans: "Lora", "Noto Serif SC", "Source Han Serif SC", "Songti SC", "Times New Roman", serif;
         --font-display: "Playfair Display", "Noto Serif SC", var(--font-sans);
+        --font-note: "Caveat", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
         font-family: var(--font-sans);
       }
       [data-theme="dark"] {
@@ -679,16 +680,25 @@
         position: relative;
         overflow: hidden;
       }
+      @keyframes hero-bg-studio-drift {
+        0%,
+        100% {
+          transform: translateY(-50%) rotate(-90deg) translate3d(0, 0, 0);
+        }
+        50% {
+          transform: translateY(-50%) rotate(-90deg) translate3d(-14px, 10px, 0);
+        }
+      }
       .hero::after {
-        content: "PORTFOLIO";
+        content: "OPEN STUDIO";
         position: absolute;
-        right: 3%;
+        right: 2%;
         top: 48%;
         transform: translateY(-50%) rotate(-90deg);
-        font-size: clamp(3rem, 10vw, 5.2rem);
+        font-size: clamp(2.35rem, 8vw, 4rem);
         font-weight: 700;
         font-style: italic;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.14em;
         color: color-mix(in srgb, var(--accent) 7%, var(--text) 4%);
         pointer-events: none;
         z-index: 0;
@@ -696,6 +706,12 @@
         line-height: 1;
         white-space: nowrap;
         user-select: none;
+        animation: hero-bg-studio-drift 32s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero::after {
+          animation: none;
+        }
       }
       @media (max-width: 700px) {
         .hero::after {
@@ -746,12 +762,16 @@
       .hero__chip {
         font-size: 0.8rem;
         line-height: 1.4;
-        padding: 0.4rem 0.65rem;
-        border-radius: 8px;
+        padding: 0.45rem 0.72rem;
+        border-radius: 12px;
         background: color-mix(in srgb, var(--warm-tint) 100%, var(--bg));
-        border: 1px solid var(--border);
+        border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
         color: var(--text);
         font-weight: 500;
+        box-shadow: 0 4px 14px -6px rgba(30, 22, 12, 0.14), 0 1px 0 color-mix(in srgb, var(--bg-elevated) 40%, transparent);
+      }
+      [data-theme="dark"] .hero__chip {
+        box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.45), 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent);
       }
       .hero__chip--lead {
         font-size: 0.78rem;
@@ -854,6 +874,68 @@
       .contact-line--social a:hover {
         text-decoration: underline;
       }
+      .social-icons-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      .social-icon-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 11px;
+        color: var(--accent);
+        background: color-mix(in srgb, var(--warm-tint) 80%, var(--bg-elevated));
+        border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+        box-shadow: 0 3px 10px -5px rgba(30, 22, 12, 0.18);
+        text-decoration: none;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, color 0.15s ease,
+          background 0.15s ease;
+      }
+      .social-icon-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px -8px rgba(30, 22, 12, 0.28);
+        color: var(--text);
+      }
+      .social-icon-link svg {
+        width: 1.22rem;
+        height: 1.22rem;
+        fill: currentColor;
+        flex-shrink: 0;
+      }
+      .social-icon-link--xhs svg {
+        width: 1.05rem;
+        height: 1.05rem;
+      }
+      [data-theme="dark"] .social-icon-link {
+        box-shadow: 0 4px 14px -6px rgba(0, 0, 0, 0.45);
+      }
+      .site-footer__social-row.social-icons-row {
+        justify-content: center;
+        gap: 0.65rem;
+      }
+      .site-footer__social-row.social-icons-row .social-icon-link {
+        background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+      }
+      .hero__panel-quick {
+        margin: 0.85rem 0 0;
+        padding-top: 0.7rem;
+        border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+        text-align: center;
+      }
+      .hero__panel-quick a {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .hero__panel-quick a:hover {
+        text-decoration: underline;
+      }
       .contact-line--social .contact-hint {
         display: block;
         font-size: 0.8rem;
@@ -862,14 +944,21 @@
         width: 100%;
       }
       .hero-ice-breaker {
-        font-size: 0.88rem;
+        font-family: var(--font-note);
+        font-size: clamp(0.95rem, 2.5vw, 1.08rem);
+        font-weight: 600;
         color: var(--text-muted);
         max-width: 40rem;
         margin: 0.85rem 0 0;
-        line-height: 1.55;
-        font-style: italic;
+        line-height: 1.5;
+        font-style: normal;
         border-left: 3px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
-        padding-left: 0.8rem;
+        padding-left: 0.85rem;
+      }
+      body[data-locale="zh"] .hero-ice-breaker.i18n-zh {
+        font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", var(--font-note);
+        font-weight: 600;
+        letter-spacing: 0.02em;
       }
       .site-footer__slogan {
         font-size: 0.95rem;
@@ -2834,7 +2923,7 @@
             </div>
           </figure>
           <div class="hero__main">
-            <p class="kicker"><span lang="en">PORTFOLIO / OPEN STUDIO</span></p>
+            <p class="kicker"><span lang="en">DIGITAL STUDIO · OPEN STUDIO</span></p>
             <h1>
               <span class="h1__name">赵梓淇</span>
               <span class="h1__en" lang="en">April Zhao</span>
@@ -2881,39 +2970,105 @@
               </p>
             </div>
             <div class="contact-line contact-line--social" aria-label="社交主页">
-              <span class="i18n-zh" lang="zh-CN"
-                ><a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer" title="Ziqi Zhao"
-                  >领英</a
-                >
+              <span class="i18n-zh social-icons-row" lang="zh-CN">
+                <a
+                  href="https://www.linkedin.com/in/aprilzz"
+                  class="social-icon-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="领英 · Ziqi Zhao"
+                  aria-label="领英"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+                ></a>
                 <a
                   href="https://xhslink.com/m/5YCfk76OaSg"
+                  class="social-icon-link social-icon-link--xhs"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="ZZ碎碎念"
-                  >小红书</a
-                >
+                  title="小红书 · ZZ碎碎念"
+                  aria-label="小红书"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M7 3h10a2 2 0 012 2v15l-7-3.5L5 20V5a2 2 0 012-2zm3.5 6.25h3v1.25h-3V9.25zm0 2.5h3v1.25h-3v-1.25z"
+                  /></svg
+                ></a>
                 <a
                   href="https://b23.tv/4j5c6Co"
+                  class="social-icon-link"
                   target="_blank"
                   rel="noopener noreferrer"
-                  title="ZZ帧藏簿"
-                  >哔哩哔哩</a
-                >
+                  title="哔哩哔哩 · ZZ帧藏簿"
+                  aria-label="哔哩哔哩"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M4 5.5h3l1-2h8l1 2h3v2H4v-2zm2 4h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2zm4 2v6l5-3-5-3z"
+                  /></svg
+                ></a>
                 <a
                   href="https://www.instagram.com/4in_april/"
+                  class="social-icon-link"
                   target="_blank"
                   rel="noopener noreferrer me"
-                  title="@4in_april"
-                  >Instagram</a
-                >
+                  title="Instagram · @4in_april"
+                  aria-label="Instagram"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                  /></svg
+                ></a>
               </span>
-              <span class="i18n-en" lang="en"
-                ><a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer"
-                  >LinkedIn</a
-                >
-                <a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">Xiaohongshu</a>
-                <a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">Bilibili</a>
-                <a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
+              <span class="i18n-en social-icons-row" lang="en">
+                <a
+                  href="https://www.linkedin.com/in/aprilzz"
+                  class="social-icon-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="LinkedIn — Ziqi Zhao"
+                  aria-label="LinkedIn"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  /></svg
+                ></a>
+                <a
+                  href="https://xhslink.com/m/5YCfk76OaSg"
+                  class="social-icon-link social-icon-link--xhs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Xiaohongshu — ZZ碎碎念"
+                  aria-label="Xiaohongshu"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M7 3h10a2 2 0 012 2v15l-7-3.5L5 20V5a2 2 0 012-2zm3.5 6.25h3v1.25h-3V9.25zm0 2.5h3v1.25h-3v-1.25z"
+                  /></svg
+                ></a>
+                <a
+                  href="https://b23.tv/4j5c6Co"
+                  class="social-icon-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Bilibili — ZZ帧藏簿"
+                  aria-label="Bilibili"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M4 5.5h3l1-2h8l1 2h3v2H4v-2zm2 4h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2zm4 2v6l5-3-5-3z"
+                  /></svg
+                ></a>
+                <a
+                  href="https://www.instagram.com/4in_april/"
+                  class="social-icon-link"
+                  target="_blank"
+                  rel="noopener noreferrer me"
+                  title="Instagram — @4in_april"
+                  aria-label="Instagram"
+                  ><svg viewBox="0 0 24 24" aria-hidden="true"
+                    ><path
+                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                  /></svg
+                ></a>
               </span>
             </div>
             <div class="btn-row">
@@ -2921,7 +3076,7 @@
                 ><span class="i18n-zh">预约 15 分钟交流</span><span class="i18n-en" lang="en">Book 15 min</span></a
               >
               <a class="btn btn-ghost" href="#portfolio"
-                ><span class="i18n-zh">查看项目与案例</span><span class="i18n-en" lang="en">See projects &amp; work</span></a
+                ><span class="i18n-zh">探索我的实验</span><span class="i18n-en" lang="en">Explore my experiments</span></a
               >
             </div>
             <p class="hero-ice-breaker i18n-zh" lang="zh-CN">
@@ -2943,6 +3098,12 @@
               <p class="hero__chip hero__chip--lead i18n-zh" lang="zh">🧸 纯聊天也行：ENFJ，情绪树洞 / 脑洞搭子，天马行空欢迎。</p>
               <p class="hero__chip hero__chip--lead i18n-en" lang="en">🧸 Or just vibe: ENFJ sounding board—wild ideas OK.</p>
             </div>
+            <p class="hero__panel-quick i18n-zh" lang="zh">
+              <a href="#coffee">快速提问 · 留言</a>
+            </p>
+            <p class="hero__panel-quick i18n-en" lang="en">
+              <a href="#coffee">Quick question · Leave a note</a>
+            </p>
           </aside>
         </div>
       </section>
@@ -2951,11 +3112,11 @@
         <div class="marquee-ribbon__inner">
           <div class="marquee-ribbon__track">
             <span>BA</span> · <span>DATA + OPS</span> · <span>CONTENT GROWTH</span> · <span>EVENTS</span> ·
-            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>PORTFOLIO</span> ·
+            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>OPEN STUDIO</span> ·
           </div>
           <div class="marquee-ribbon__track" aria-hidden="true">
             <span>BA</span> · <span>DATA + OPS</span> · <span>CONTENT GROWTH</span> · <span>EVENTS</span> ·
-            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>PORTFOLIO</span> ·
+            <span>WASHU MSBA</span> · <span>A/B &amp; GROWTH</span> · <span>OPEN STUDIO</span> ·
           </div>
         </div>
       </div>
@@ -4581,23 +4742,105 @@
           </p>
         </div>
         <nav class="site-footer__social" aria-label="社交链接">
-          <p class="site-footer__social-row i18n-zh" lang="zh-CN">
-            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">领英</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">小红书</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">哔哩哔哩</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
+          <p class="site-footer__social-row social-icons-row i18n-zh" lang="zh-CN">
+            <a
+              href="https://www.linkedin.com/in/aprilzz"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="领英 · Ziqi Zhao"
+              aria-label="领英"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+              /></svg
+            ></a>
+            <a
+              href="https://xhslink.com/m/5YCfk76OaSg"
+              class="social-icon-link social-icon-link--xhs"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="小红书 · ZZ碎碎念"
+              aria-label="小红书"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M7 3h10a2 2 0 012 2v15l-7-3.5L5 20V5a2 2 0 012-2zm3.5 6.25h3v1.25h-3V9.25zm0 2.5h3v1.25h-3v-1.25z"
+              /></svg
+            ></a>
+            <a
+              href="https://b23.tv/4j5c6Co"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="哔哩哔哩 · ZZ帧藏簿"
+              aria-label="哔哩哔哩"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M4 5.5h3l1-2h8l1 2h3v2H4v-2zm2 4h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2zm4 2v6l5-3-5-3z"
+              /></svg
+            ></a>
+            <a
+              href="https://www.instagram.com/4in_april/"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer me"
+              title="Instagram · @4in_april"
+              aria-label="Instagram"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+              /></svg
+            ></a>
           </p>
-          <p class="site-footer__social-row i18n-en" lang="en">
-            <a href="https://www.linkedin.com/in/aprilzz" target="_blank" rel="noopener noreferrer">LinkedIn</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://xhslink.com/m/5YCfk76OaSg" target="_blank" rel="noopener noreferrer">Xiaohongshu</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://b23.tv/4j5c6Co" target="_blank" rel="noopener noreferrer">Bilibili</a
-            ><span class="site-footer__link-sep">·</span
-            ><a href="https://www.instagram.com/4in_april/" target="_blank" rel="noopener noreferrer me">Instagram</a>
+          <p class="site-footer__social-row social-icons-row i18n-en" lang="en">
+            <a
+              href="https://www.linkedin.com/in/aprilzz"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="LinkedIn — Ziqi Zhao"
+              aria-label="LinkedIn"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+              /></svg
+            ></a>
+            <a
+              href="https://xhslink.com/m/5YCfk76OaSg"
+              class="social-icon-link social-icon-link--xhs"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Xiaohongshu — ZZ碎碎念"
+              aria-label="Xiaohongshu"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M7 3h10a2 2 0 012 2v15l-7-3.5L5 20V5a2 2 0 012-2zm3.5 6.25h3v1.25h-3V9.25zm0 2.5h3v1.25h-3v-1.25z"
+              /></svg
+            ></a>
+            <a
+              href="https://b23.tv/4j5c6Co"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Bilibili — ZZ帧藏簿"
+              aria-label="Bilibili"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M4 5.5h3l1-2h8l1 2h3v2H4v-2zm2 4h12a2 2 0 012 2v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7a2 2 0 012-2zm4 2v6l5-3-5-3z"
+              /></svg
+            ></a>
+            <a
+              href="https://www.instagram.com/4in_april/"
+              class="social-icon-link"
+              target="_blank"
+              rel="noopener noreferrer me"
+              title="Instagram — @4in_april"
+              aria-label="Instagram"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"
+                ><path
+                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+              /></svg
+            ></a>
           </p>
         </nav>
         <p class="site-footer__copyright i18n-zh" lang="zh-CN">© <span class="js-year"></span> 赵梓淇</p>
