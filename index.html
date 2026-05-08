@@ -30,13 +30,15 @@
        */
       window.APRIL_BOOKING = {
         /**
-         * Calendly：填活动链接后，站内用 iframe 嵌入（嵌入参数由脚本自动生成）；与下方 embedUrl 二选一。
-         * 例：https://calendly.com/your-name/let-s-talk
+         * 对外预约入口（与下方「数字实验室」卡片一致；脚本用于可选内嵌日历）。
+         * 15 min · Flash Sync：https://calendly.com/april-zhao-wustl/new-meeting
+         * 30 min · Deep Dive：https://calendly.com/april-zhao-wustl/30min
+         * 1 h · Co-Creation Lab：https://calendly.com/april-zhao-wustl/let-s-talk
          */
-        calendlyInlineUrl: "https://calendly.com/april-zhao-wustl/let-s-talk",
+        calendlyInlineUrl: "https://calendly.com/april-zhao-wustl/30min",
         /** 选填。通用 iframe 嵌入（非 Calendly 或自托管页）。与 calendlyInlineUrl 二选一。 */
         embedUrl: "",
-        openInNewTabUrl: "https://calendly.com/april-zhao-wustl/let-s-talk",
+        openInNewTabUrl: "https://calendly.com/april-zhao-wustl/30min",
         /**
          * 必填（否则为演示模式）。当前为 Google Apps Script Web 应用「/exec」地址；在地址栏直接打开若提示 doGet 属正常（表单走 POST）。
          * 若改回 FormSubmit：用 https://formsubmit.co/ajax/你的邮箱
@@ -1770,6 +1772,113 @@
       .coffee-booking-intro__list li {
         margin: 0.35rem 0;
       }
+      #coffee-lab {
+        scroll-margin-top: calc(var(--nav-h) + 16px);
+      }
+      .coffee-lab {
+        margin: 0 0 1.85rem;
+      }
+      .coffee-lab__heading {
+        font-family: var(--font-display);
+        font-size: clamp(1.15rem, 2.4vw, 1.35rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+        color: var(--text);
+      }
+      .coffee-lab__lede {
+        margin: 0 0 1.1rem !important;
+        max-width: 40rem;
+      }
+      .coffee-lab__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+        gap: 1rem;
+        align-items: stretch;
+      }
+      .coffee-lab-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1.15rem 1.2rem 1rem;
+        border-radius: var(--radius);
+        border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+        background: color-mix(in srgb, var(--bg-elevated) 92%, var(--warm-tint));
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 10px 28px -14px rgba(30, 22, 12, 0.18);
+        transition: transform 0.2s ease, box-shadow 0.22s ease, border-color 0.18s ease;
+      }
+      .coffee-lab-card:hover {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+        box-shadow: 0 18px 40px -18px rgba(30, 22, 12, 0.26);
+      }
+      .coffee-lab-card:focus-visible {
+        outline: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
+        outline-offset: 3px;
+      }
+      .coffee-lab-card__dur {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-family: var(--font-display);
+        color: var(--accent-2);
+        margin: 0;
+      }
+      .coffee-lab-card__titles {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.35rem 0.5rem;
+        margin: 0;
+      }
+      .coffee-lab-card__titles strong {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 1.08rem;
+        letter-spacing: -0.02em;
+      }
+      .coffee-lab-card__titles span:not(strong) {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+      .coffee-lab-card__slash {
+        opacity: 0.35;
+        font-weight: 400;
+        margin: 0 0.1em;
+      }
+      .coffee-lab-card__desc {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.55;
+        color: var(--text-muted);
+        flex: 1;
+      }
+      .coffee-lab-card__cta {
+        margin: 0.35rem 0 0;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+      .coffee-lab-card:hover .coffee-lab-card__cta {
+        color: var(--text);
+      }
+      .coffee-lab-card__cta-arrow {
+        transition: transform 0.2s ease;
+      }
+      .coffee-lab-card:hover .coffee-lab-card__cta-arrow {
+        transform: translateX(4px);
+      }
+      [data-theme="dark"] .coffee-lab-card {
+        box-shadow: 0 12px 36px -16px rgba(0, 0, 0, 0.55);
+      }
       .coffee-demo-note {
         margin: 0.75rem 0 0 !important;
         font-size: 0.88rem !important;
@@ -2913,7 +3022,7 @@
           <a href="#portfolio"
             ><span class="i18n-zh">作品集</span><span class="i18n-en">Work</span></a
           >
-          <a href="#coffee"
+          <a href="#coffee-lab"
             ><span class="i18n-zh">联系预约</span><span class="i18n-en">Let&apos;s Talk</span></a
           >
         </nav>
@@ -2952,7 +3061,7 @@
       <a href="#projects"><span class="i18n-zh">项目经历</span><span class="i18n-en">Projects</span></a>
       <a href="#skills"><span class="i18n-zh">技能</span><span class="i18n-en">Skills</span></a>
       <a href="#portfolio"><span class="i18n-zh">作品集</span><span class="i18n-en">Work</span></a>
-      <a href="#coffee"><span class="i18n-zh">联系预约</span><span class="i18n-en">Let&apos;s Talk</span></a>
+      <a href="#coffee-lab"><span class="i18n-zh">联系预约</span><span class="i18n-en">Let&apos;s Talk</span></a>
     </aside>
 
     <main id="main">
@@ -3132,9 +3241,8 @@
               </span>
             </div>
             <div class="btn-row">
-              <a class="btn btn-primary" href="#coffee"
-                ><span class="i18n-zh">预约 Let's Talk（10 分钟–1 小时）</span
-                ><span class="i18n-en" lang="en">Book Let's Talk (10 min – 1 hr)</span></a
+              <a class="btn btn-primary" href="#coffee-lab"
+                ><span class="i18n-zh">预约交流</span><span class="i18n-en" lang="en">Book a chat</span></a
               >
               <a class="btn btn-ghost" href="#portfolio"
                 ><span class="i18n-zh">探索我的实验</span><span class="i18n-en" lang="en">Explore my experiments</span></a
@@ -3160,12 +3268,12 @@
               <p class="hero__chip hero__chip--lead i18n-en" lang="en">🧸 Or just vibe: ENFJ sounding board—wild ideas OK.</p>
             </div>
             <p class="hero__panel-quick i18n-zh" lang="zh">
-              <a href="#coffee"
+              <a href="#coffee-lab"
                 >快速提问 · 留言<span class="hero__panel-quick__arrow" aria-hidden="true">→</span></a
               >
             </p>
             <p class="hero__panel-quick i18n-en" lang="en">
-              <a href="#coffee"
+              <a href="#coffee-lab"
                 >Quick question · Leave a note<span class="hero__panel-quick__arrow" aria-hidden="true">→</span></a
               >
             </p>
@@ -3494,11 +3602,11 @@
             </ol>
             </div>
             <p class="about-tl-cta i18n-zh" lang="zh-CN">
-              <a class="about-cta-brief" href="#coffee">下一步 · 预约交流</a>
+              <a class="about-cta-brief" href="#coffee-lab">下一步 · 预约交流</a>
               <span class="about-cta-fine">中/EN 与机翻在导航，预约见下</span>
             </p>
             <p class="about-tl-cta i18n-en" lang="en">
-              <a class="about-cta-brief" href="#coffee">Next · book a chat</a>
+              <a class="about-cta-brief" href="#coffee-lab">Next · book a chat</a>
               <span class="about-cta-fine">中/EN + translate widget, form below</span>
             </p>
           </div>
@@ -4525,9 +4633,9 @@
               </p>
               <p class="sub coffee-booking-intro__ttl"><strong>预约方式</strong></p>
               <ul class="coffee-booking-intro__list">
-                <li>填下方表单留意向与时间偏好</li>
-                <li>我会按你选的会议方式回信 / 链</li>
-                <li>也可下滑用<strong>自助预约</strong>直接锁时段（Calendly 单次时长可按需在<strong>约 10 分钟–1 小时</strong>内选择）</li>
+                <li>在下方<strong>数字实验室</strong>选时段类型（15 / 30 / 60 分钟），跳转 Calendly 锁时间</li>
+                <li>或填表单留意向与时间偏好，我会按会议方式回信</li>
+                <li>亦可展开<strong>自助预约</strong>在内嵌日历中选 30 分钟时段</li>
               </ul>
               <p class="sub coffee-demo-note" id="coffeeDemoNoteZh" hidden>
                 <strong>注：</strong>当前为演示状态，提交仅作测试，不会发送真实邮件。
@@ -4541,9 +4649,9 @@
               </p>
               <p class="sub coffee-booking-intro__ttl"><strong>How to book</strong></p>
               <ul class="coffee-booking-intro__list">
-                <li>Use the quick form below for intent + timing prefs.</li>
-                <li>I’ll reply with meeting details via your preferred tool.</li>
-                <li>Or scroll down to <strong>self-book</strong>—Calendly slots are commonly <strong>10 minutes up to 1 hour</strong>.</li>
+                <li>Pick a session in the <strong>Digital Lab</strong> below (15 / 30 / 60 min)—opens Calendly.</li>
+                <li>Or use the form for intent + timing; I’ll reply with meeting details.</li>
+                <li>Or expand <strong>self-book</strong> for an embedded 30-minute calendar.</li>
               </ul>
               <p class="sub coffee-demo-note" id="coffeeDemoNoteEn" hidden>
                 <strong>Note:</strong> Demo mode—submits aren’t emailed yet.
@@ -4551,6 +4659,71 @@
               <p class="sub coffee-cal-hint" id="coffeeCalHintEn" hidden></p>
             </div>
           </header>
+          <div id="coffee-lab" class="coffee-lab" aria-labelledby="coffee-lab-heading">
+            <h3 id="coffee-lab-heading" class="coffee-lab__heading">
+              <span class="i18n-zh">数字实验室 · 预约时段</span><span class="i18n-en" lang="en">Digital Lab · Book a session</span>
+            </h3>
+            <p class="sub coffee-lab__lede">
+              <span class="i18n-zh" lang="zh-CN"
+                >三种时长对应不同密度的对话——像在实验室里选一支「试管」：从轻量对齐到深度拆解与共创。</span
+              ><span class="i18n-en" lang="en"
+                >Three lengths for three energies—like picking an experiment: quick sync, deep dive, or full co-creation.</span
+              >
+            </p>
+            <div class="coffee-lab__grid">
+              <a
+                class="coffee-lab-card"
+                href="https://calendly.com/april-zhao-wustl/new-meeting"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <p class="coffee-lab-card__dur">15 min · 15 分钟</p>
+                <p class="coffee-lab-card__titles">
+                  <strong>Flash Sync</strong><span class="coffee-lab-card__slash">/</span><span>闪电碰撞</span>
+                </p>
+                <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">适合快速解决一个小疑问，或者初步认识一下。</p>
+                <p class="coffee-lab-card__desc i18n-en" lang="en">Quick questions or a first hello—fast alignment.</p>
+                <span class="coffee-lab-card__cta"
+                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
+                >
+              </a>
+              <a
+                class="coffee-lab-card"
+                href="https://calendly.com/april-zhao-wustl/30min"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <p class="coffee-lab-card__dur">30 min · 30 分钟</p>
+                <p class="coffee-lab-card__titles">
+                  <strong>Deep Dive</strong><span class="coffee-lab-card__slash">/</span><span>深度拆解</span>
+                </p>
+                <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">针对具体的 AI 运营、0→1 项目进行深入探讨。</p>
+                <p class="coffee-lab-card__desc i18n-en" lang="en">Go deeper on AI in ops, growth, and 0→1 projects.</p>
+                <span class="coffee-lab-card__cta"
+                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
+                >
+              </a>
+              <a
+                class="coffee-lab-card"
+                href="https://calendly.com/april-zhao-wustl/let-s-talk"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <p class="coffee-lab-card__dur">1 hour · 1 小时</p>
+                <p class="coffee-lab-card__titles">
+                  <strong>Co-Creation Lab</strong><span class="coffee-lab-card__slash">/</span><span>协作共创</span>
+                </p>
+                <p class="coffee-lab-card__desc i18n-zh" lang="zh-CN">适合真正的脑暴、长谈或者深度咨询。</p>
+                <p class="coffee-lab-card__desc i18n-en" lang="en">Brainstorms, long conversations, or intensive consulting.</p>
+                <span class="coffee-lab-card__cta"
+                  ><span class="i18n-zh">Calendly 选时段</span><span class="i18n-en" lang="en">Pick a slot</span
+                  ><span class="coffee-lab-card__cta-arrow" aria-hidden="true">→</span></span
+                >
+              </a>
+            </div>
+          </div>
           <div class="time-box" id="coffee-time-box">
             <p id="timeBoxLine1z" class="i18n-zh"><strong>可沟通时间（参考）</strong></p>
             <p id="timeBoxLine1e" class="i18n-en" lang="en"><strong>Availability (guide)</strong></p>
@@ -4706,7 +4879,7 @@
                     color: var(--text-muted);
                     margin-top: 0.3rem;
                   "
-                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）；单次时长在页内自选约 10 分钟–1 小时</span
+                  >点开链或下方区域看空档并排期（可接 Zoom / Outlook）</span
                 ></span
               >
               <span class="i18n-en" lang="en"
@@ -4718,7 +4891,7 @@
                     color: var(--text-muted);
                     margin-top: 0.3rem;
                   "
-                  >Open slots inline or in a tab—pick about <strong>10 min to 1 hr</strong> per meeting when offered.</span
+                  >Open slots inline or in a tab—calendar sync when connected.</span
                 ></span
               >
             </summary>
@@ -4741,7 +4914,7 @@
                 <iframe
                   id="booking-iframe"
                   class="booking-live-iframe"
-                  title="Let's Talk — pick about 10 min to 1 hr"
+                  title="Book a time — Coffee chat"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                   allow="camera; microphone; fullscreen; payment"
@@ -4766,10 +4939,10 @@
                 ><span class="i18n-en" lang="en">Complete booking in a new tab</span>
               </h3>
               <p class="sub i18n-zh" style="margin-top: 0; margin-bottom: 1rem">
-                已指向 Let's Talk 预约页；时长可在<strong>约 10 分钟–1 小时</strong>内自选（以 Calendly 页面为准）。选好时段后由平台发邮件与日历邀请（接了 Zoom 会一并带出）。
+                已指向预约页。选好时段后，由平台跟进邮件与日历邀请（接了 Zoom 会一并带出）。
               </p>
               <p class="sub i18n-en" style="margin-top: 0; margin-bottom: 1rem" lang="en">
-                Opens the <strong>Let&apos;s Talk</strong> page—choose roughly <strong>10 minutes up to 1 hour</strong> when Calendly offers those durations. Confirmations, calendar, and Zoom flow through the app when linked.
+                Booking link is live—the app sends slots, emails, calendar, and Zoom if linked.
               </p>
               <a
                 class="btn btn-primary"
@@ -5377,14 +5550,14 @@
           if (calHintZh) {
             calHintZh.hidden = false;
             calHintZh.textContent = formSubmitUrl
-              ? "下方已内嵌 Let's Talk 日历，可直接选时段（单次时长约 10 分钟–1 小时，以 Calendly 为准）；上方表单也会投递到我邮箱，可搭配使用。"
-              : "下方已内嵌 Let's Talk 日历，可直接点选可约时间（时长约 10 分钟–1 小时）。";
+              ? "下方已内嵌日历，可直接选时段；上方表单也会投递到我邮箱，可搭配使用。"
+              : "下方已内嵌日历，可直接点选可约时间。";
           }
           if (calHintEn) {
             calHintEn.hidden = false;
             calHintEn.textContent = formSubmitUrl
-              ? "Let's Talk calendar is embedded—pick a slot (often ~10 min–1 hr per Calendly); the form also reaches my inbox when enabled."
-              : "Embedded Let's Talk calendar—choose about 10 minutes up to 1 hour when offered.";
+              ? "Calendar is embedded below; the form also reaches my inbox when enabled—use either or both."
+              : "Calendar is embedded below—pick an open slot.";
           }
           if (timeBoxLine1z) {
             timeBoxLine1z.innerHTML = "<strong>可沟通时间（与日历展示一致）</strong>";
@@ -5418,14 +5591,14 @@
           if (calHintZh) {
             calHintZh.hidden = false;
             calHintZh.textContent = formSubmitUrl
-              ? "下方按钮可打开 Let's Talk 预约页选时段（单次时长约 10 分钟–1 小时，以 Calendly 为准）；上方表单亦会发到邮箱，可搭配使用。"
-              : "下方按钮可打开 Let's Talk 预约页，查看可约时间与时长选项。";
+              ? "下方按钮可打开预约页选时段；上方表单亦会发到邮箱，可搭配使用。"
+              : "下方按钮可打开预约页，查看可约时间。";
           }
           if (calHintEn) {
             calHintEn.hidden = false;
             calHintEn.textContent = formSubmitUrl
-              ? "Use the Let's Talk link below for booking (~10 min–1 hr per Calendly); the form also posts when enabled."
-              : "Open Let's Talk in a new tab to pick duration and time.";
+              ? "Use the button below for an external booking page; the form also posts when enabled."
+              : "Use the button below to open booking in a new tab.";
           }
           if (calOptional) calOptional.open = true;
         } else {
