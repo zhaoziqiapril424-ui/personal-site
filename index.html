@@ -380,6 +380,22 @@
         margin-top: 0.35rem;
         font-family: var(--font-display);
       }
+      .hero-name-stack {
+        display: block;
+      }
+      .h1__name--latin {
+        font-family: var(--font-display);
+        font-weight: 800;
+      }
+      .h1__subname {
+        display: block;
+        font-size: 0.95rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: var(--text-muted);
+        margin-top: 0.35rem;
+        font-family: var(--font-display);
+      }
       .tagline-en {
         font-size: 0.95rem;
         font-style: italic;
@@ -2203,9 +2219,15 @@
         font-size: 0.95rem;
         margin: 0 0 1rem;
       }
-      /* i18n: 在 body 上切换 data-locale="zh" | "en" */
+      /* i18n: 在 html/body 上切换 data-locale="zh" | "en"；脚本会为当前语言以外的节点加 hidden */
+      html[data-locale="en"] .i18n-zh,
+      html[data-locale="zh"] .i18n-en,
       body[data-locale="en"] .i18n-zh,
       body[data-locale="zh"] .i18n-en {
+        display: none !important;
+      }
+      .i18n-zh[hidden],
+      .i18n-en[hidden] {
         display: none !important;
       }
       .i18n-block {
@@ -3215,8 +3237,14 @@
           <div class="hero__main">
             <p class="kicker"><span lang="en">BETA SPACE : OPEN ACCESS</span></p>
             <h1>
-              <span class="h1__name">赵梓淇</span>
-              <span class="h1__en" lang="en">April Zhao</span>
+              <span class="hero-name-stack i18n-zh">
+                <span class="h1__name">赵梓淇</span>
+                <span class="h1__en" lang="en">April Zhao</span>
+              </span>
+              <span class="hero-name-stack i18n-en" lang="en">
+                <span class="h1__name h1__name--latin">April Zhao</span>
+                <span class="h1__subname">Ziqi Zhao</span>
+              </span>
             </h1>
             <p class="hero__role i18n-zh">复合型增长运营操盘手</p>
             <p class="hero__role i18n-en" lang="en">Growth &amp; ops — data × content</p>
@@ -3235,12 +3263,14 @@
                 <span class="bento-metric__label i18n-en" lang="en">Campaign-scale exposure, campus &amp; multi-channel peak moments</span>
               </div>
               <div class="bento-metric__cell">
-                <span class="bento-metric__num">100万+</span>
+                <span class="bento-metric__num i18n-zh">100万+</span>
+                <span class="bento-metric__num i18n-en" lang="en">1M+</span>
                 <span class="bento-metric__label i18n-zh">全渠道累计播放 · 推广与自然流闭环</span>
                 <span class="bento-metric__label i18n-en" lang="en">Channel-wide plays paid + organic flywheel</span>
               </div>
               <div class="bento-metric__cell">
-                <span class="bento-metric__num">2.2万+</span>
+                <span class="bento-metric__num i18n-zh">2.2万+</span>
+                <span class="bento-metric__num i18n-en" lang="en">22k+</span>
                 <span class="bento-metric__label i18n-zh">多平台 0→1 冷启 · 矩阵与转化落地</span>
                 <span class="bento-metric__label i18n-en" lang="en">0→1 cold-start across platforms accounts &amp; conversion</span>
               </div>
@@ -3472,18 +3502,18 @@
                 嗨，我是赵梓淇，你可以叫我小淇、梓淇或 April〜我想把这里做成<strong>双向交流</strong>的小角落：你带着问题或半成形的想法来，我们一起把思路捋清楚、找到下一步。互相学习，一起进步。
               </p>
               <p class="about-hello i18n-en" lang="en">
-                Hi—I’m April (Ziqi). Call me <strong>小淇</strong>, <strong>梓淇</strong>, or <strong>April</strong>. This page is meant to be a <strong>two-way nook</strong>: bring a fuzzy question or idea and we shape it into a next step—and learn together.
+                Hi—I’m April (Ziqi). Call me <strong>Xiaoqi</strong>, <strong>Ziqi</strong>, or <strong>April</strong>. This page is meant to be a <strong>two-way nook</strong>: bring a fuzzy question or idea and we shape it into a next step—and learn together.
               </p>
               <p class="about-lang-note i18n-zh" lang="zh-CN">支持中文/英文交流</p>
-              <p class="about-lang-note i18n-en" lang="en">中文 or English, both welcome</p>
+              <p class="about-lang-note i18n-en" lang="en">Chinese or English — both welcome</p>
             </div>
           </div>
           <h3
             class="section-eyebrow about-timeline-eyebrow"
             style="margin: 0.5rem 0 0.75rem; font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.18em"
-            lang="en"
           >
-            TIMELINE · 成长线
+            <span class="i18n-zh" lang="zh-CN">TIMELINE · 成长线</span>
+            <span class="i18n-en" lang="en">TIMELINE · Growth arc</span>
           </h3>
           <div class="about-cv-block">
             <div class="about-tl-cluster i18n-zh" lang="zh-CN">
@@ -3873,18 +3903,33 @@
                       fetchpriority="low"
                   /></span>
                   <span>
-                    圣路易斯华盛顿大学 · 奥林商学院<br />
-                    <span class="meta">商业分析硕士 | 2024.08 - 2025.12 · GPA 3.83/4.0</span>
+                    <span class="i18n-zh" lang="zh-CN"
+                      >圣路易斯华盛顿大学 · 奥林商学院<br />
+                      <span class="meta">商业分析硕士 | 2024.08 - 2025.12 · GPA 3.83/4.0</span></span
+                    >
+                    <span class="i18n-en" lang="en"
+                      >Washington University in St. Louis · Olin Business School<br />
+                      <span class="meta">M.S. Business Analytics | 2024.08 - 2025.12 · GPA 3.83/4.0</span></span
+                    >
                   </span>
                 </span>
               </summary>
               <div class="card-body">
-                <p>
+                <p class="i18n-zh" lang="zh-CN">
                   <strong>核心课程：</strong>市场调研 · 广告与定价策略 · 数字营销 · A/B 测试 ·
                   <strong>Python</strong> · <strong>机器学习</strong> · 决策分析 · 文本挖掘 · 大数据与云计算
                 </p>
-                <p>
+                <p class="i18n-en" lang="en">
+                  <strong>Core coursework:</strong> marketing research · advertising &amp; pricing strategy · digital
+                  marketing · A/B testing · <strong>Python</strong> · <strong>machine learning</strong> · decision
+                  analytics · text mining · big data &amp; cloud
+                </p>
+                <p class="i18n-zh" lang="zh-CN">
                   <strong>荣誉：</strong><strong>Beta Gamma Sigma</strong>、院长奖学金 $20,000、官方学生大使
+                </p>
+                <p class="i18n-en" lang="en">
+                  <strong>Honors:</strong> <strong>Beta Gamma Sigma</strong>, Dean’s Scholarship ($20,000), official
+                  Student Ambassador
                 </p>
               </div>
             </details>
@@ -3901,16 +3946,29 @@
                       fetchpriority="low"
                   /></span>
                   <span>
-                    澳门科技大学 · 酒店与旅游管理学院<br />
-                    <span class="meta">会展管理学士 | 2019.08 - 2023.06 · GPA 3.78/4.0</span>
+                    <span class="i18n-zh" lang="zh-CN"
+                      >澳门科技大学 · 酒店与旅游管理学院<br />
+                      <span class="meta">会展管理学士 | 2019.08 - 2023.06 · GPA 3.78/4.0</span></span
+                    >
+                    <span class="i18n-en" lang="en"
+                      >Macau University of Science and Technology · Faculty of Hospitality &amp; Tourism Management<br />
+                      <span class="meta">B.A. in Event Management | 2019.08 - 2023.06 · GPA 3.78/4.0</span></span
+                    >
                   </span>
                 </span>
               </summary>
               <div class="card-body">
-                <p>
+                <p class="i18n-zh" lang="zh-CN">
                   <strong>核心课程：</strong>旅游市场营销 · 会展与广告 · 品牌管理 · 市场调研方法 · 消费者心理学 · 商务统计
                 </p>
-                <p><strong>荣誉：</strong>连续 3 年院长表彰名单、<strong>年级前 5%</strong></p>
+                <p class="i18n-en" lang="en">
+                  <strong>Core coursework:</strong> tourism marketing · events &amp; advertising · brand management ·
+                  marketing research methods · consumer psychology · business statistics
+                </p>
+                <p class="i18n-zh" lang="zh-CN"><strong>荣誉：</strong>连续 3 年院长表彰名单、<strong>年级前 5%</strong></p>
+                <p class="i18n-en" lang="en">
+                  <strong>Honors:</strong> Dean’s List three years in a row, <strong>top 5% of class</strong>
+                </p>
               </div>
             </details>
           </div>
@@ -3928,80 +3986,162 @@
           <div class="stack">
             <details class="intern-block" id="intern-wustl">
               <summary>
-                <h3>圣路易斯华盛顿大学 · 活动运营与项目协调实习生</h3>
+                <h3>
+                  <span class="i18n-zh" lang="zh-CN">圣路易斯华盛顿大学 · 活动运营与项目协调实习生</span>
+                  <span class="i18n-en" lang="en"
+                    >Washington University in St. Louis · Event Operations &amp; Program Coordination Intern</span
+                  >
+                </h3>
                 <span class="period">2025.05 - 2025.08</span>
                 <div class="stat-row">
-                  <span class="stat">注册率 60%→90%</span>
-                  <span class="stat">到场率 80%</span>
-                  <span class="stat">互动率 2.5%→8.3%</span>
-                  <span class="stat">筹备周期 - 30%</span>
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">注册率 60%→90%</span
+                    ><span class="i18n-en" lang="en">Registration 60%→90%</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">到场率 80%</span
+                    ><span class="i18n-en" lang="en">Attendance 80%</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">互动率 2.5%→8.3%</span
+                    ><span class="i18n-en" lang="en">Engagement 2.5%→8.3%</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">筹备周期 - 30%</span
+                    ><span class="i18n-en" lang="en">Prep cycle −30%</span></span
+                  >
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
-                <ul>
+                <ul class="i18n-zh" lang="zh-CN">
                   <li>主导 10 + 场学术论坛与招生活动全流程运营，报名链路优化使注册率从 60% 提升至 90%，到场率稳定 80%</li>
                   <li>搭建活动标准化 SOP，将筹备周期缩短 30%，实现流程可复用</li>
                   <li>运营社媒内容矩阵，单篇阅读破万，互动率从 2.5% 提升至 8.3%</li>
+                </ul>
+                <ul class="i18n-en" lang="en">
+                  <li
+                    >Led end-to-end ops for 10+ academic forums and recruiting events; optimized the registration path to lift
+                    sign-ups from 60% to 90%, with ~80% show-up rate</li
+                  >
+                  <li>Built standardized event SOPs, cutting prep time by ~30% and making the playbook reusable</li>
+                  <li>Ran a social content matrix—posts reaching 10k+ reads; engagement rate from 2.5% to 8.3%</li>
                 </ul>
               </div>
             </details>
             <details class="intern-block" id="intern-lingyi">
               <summary>
-                <h3>零亿出海 · 新媒体/内容商业化运营（创始核心成员）</h3>
+                <h3>
+                  <span class="i18n-zh" lang="zh-CN">零亿出海 · 新媒体/内容商业化运营（创始核心成员）</span>
+                  <span class="i18n-en" lang="en"
+                    >Lingyi (Zero to One) · New media &amp; content monetization (founding core)</span
+                  >
+                </h3>
                 <span class="period">2023.06 - 2023.12</span>
                 <div class="stat-row">
-                  <span class="stat">7 个账号冷启动</span>
-                  <span class="stat">3 个月 500 + 视频</span>
-                  <span class="stat">粉丝 2.2 万</span>
-                  <span class="stat">高转化内容 55%</span>
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">7 个账号冷启动</span
+                    ><span class="i18n-en" lang="en">7-account cold start</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">3 个月 500 + 视频</span
+                    ><span class="i18n-en" lang="en">500+ videos / 3 mo</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">粉丝 2.2 万</span
+                    ><span class="i18n-en" lang="en">22k followers</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">高转化内容 55%</span
+                    ><span class="i18n-en" lang="en">High-conversion mix 55%</span></span
+                  >
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
-                <ul>
+                <ul class="i18n-zh" lang="zh-CN">
                   <li>负责 7 个海外账号从 0 到 1 冷启动，3 个月产出 500 + 条内容，累计粉丝突破 2.2 万</li>
                   <li>通过 A/B 测试迭代内容策略，将高转化内容占比从 30% 提升至 55%</li>
                   <li>搭建内容数据看板，建立「策略 - 执行 - 复盘」全链路闭环，实现内容商业化落地</li>
+                </ul>
+                <ul class="i18n-en" lang="en">
+                  <li>Grew seven overseas accounts from 0→1—500+ assets in three months, 22k+ followers</li>
+                  <li>Used A/B tests to evolve the content strategy, raising the high-converting share from 30% to 55%</li>
+                  <li>Built dashboards and a strategy–execute–review loop to operationalize monetization</li>
                 </ul>
               </div>
             </details>
             <details class="intern-block" id="intern-macau-museum">
               <summary>
-                <h3>澳门博物馆 · 用户调研与运营实习生</h3>
+                <h3>
+                  <span class="i18n-zh" lang="zh-CN">澳门博物馆 · 用户调研与运营实习生</span>
+                  <span class="i18n-en" lang="en">Macao Museum · User Research &amp; Operations Intern</span>
+                </h3>
                 <span class="period">2023.01 - 2023.05</span>
                 <div class="stat-row">
-                  <span class="stat">调研样本 1000+</span>
-                  <span class="stat">用户满意度调研</span>
-                  <span class="stat">流程标准化落地</span>
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">调研样本 1000+</span
+                    ><span class="i18n-en" lang="en">1000+ survey samples</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">用户满意度调研</span
+                    ><span class="i18n-en" lang="en">Satisfaction research</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">流程标准化落地</span
+                    ><span class="i18n-en" lang="en">Process standardization</span></span
+                  >
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
-                <ul>
+                <ul class="i18n-zh" lang="zh-CN">
                   <li>主导用户满意度调研，回收有效问卷 1000+ 份，建立用户画像与需求洞察体系</li>
                   <li>使用 SPSS/Excel 分析用户行为数据，输出可落地的运营优化方案，观展人数实现显著提升</li>
                   <li>梳理文物交接、展品管理等核心流程，输出标准化 SOP，降低交接误差与沟通成本</li>
                   <li>基于调研结果优化多渠道传播策略，提升博物馆公众触达与参与度</li>
                 </ul>
+                <ul class="i18n-en" lang="en">
+                  <li>Led satisfaction research with 1000+ valid responses—built personas and insight frameworks</li>
+                  <li>Analyzed behavior in SPSS/Excel; shipped actionable ops fixes and lifted visitation meaningfully</li>
+                  <li>Documented artifact handoffs and exhibit workflows into SOPs to cut errors and friction</li>
+                  <li>Refined multi-channel comms from findings to grow public reach and participation</li>
+                </ul>
               </div>
             </details>
             <details class="intern-block" id="intern-baidu" open>
               <summary>
-                <h3>百度 · 校园品牌部 · 活动运营实习生</h3>
+                <h3>
+                  <span class="i18n-zh" lang="zh-CN">百度 · 校园品牌部 · 活动运营实习生</span>
+                  <span class="i18n-en" lang="en">Baidu · Campus Brand · Event Operations Intern</span>
+                </h3>
                 <span class="period">2022.06 - 2022.11</span>
                 <div class="stat-row">
-                  <span class="stat">曝光 4300 万 +</span>
-                  <span class="stat">直播峰值 30 万 +</span>
-                  <span class="stat">成本优化 40%</span>
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">曝光 4300 万 +</span
+                    ><span class="i18n-en" lang="en">43M+ impressions</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">直播峰值 30 万 +</span
+                    ><span class="i18n-en" lang="en">300k+ live peak</span></span
+                  >
+                  <span class="stat"
+                    ><span class="i18n-zh" lang="zh-CN">成本优化 40%</span
+                    ><span class="i18n-en" lang="en">40% cost optimization</span></span
+                  >
                 </div>
                 <span class="chev" aria-hidden="true">▼</span>
               </summary>
               <div class="intern-body">
-                <ul>
+                <ul class="i18n-zh" lang="zh-CN">
                   <li>统筹 CCF 60 周年分会场全案运营，活动总曝光 4300 万 +，直播峰值 30 万 +</li>
                   <li>通过内部化内容制作与流程优化，将项目成本降低 40%</li>
                   <li>沉淀大型活动 SOP 与风险管理模板，形成可复用的项目资产</li>
+                </ul>
+                <ul class="i18n-en" lang="en">
+                  <li>End-to-end ops for a CCF 60th-anniversary satellite program—43M+ impressions, 300k+ live peak</li>
+                  <li>In-housed production and tightened workflows to cut project cost by ~40%</li>
+                  <li>Packaged large-event SOPs and risk templates into reusable playbooks</li>
                 </ul>
                 <p class="intern-body__ccf-cap i18n-zh" lang="zh-CN" id="baidu-ccf-cap-zh">
                   活动现场实拍：包含主舞台、嘉宾合影、签到区等环节（共 10 张）
@@ -4542,10 +4682,15 @@
                 <span class="tag tag--focus">Python</span>
                 <span class="tag tag--focus">SQL</span>
                 <span class="tag">Pandas / NumPy</span>
-                <span class="tag">Excel 高阶</span>
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">Excel 高阶</span><span class="i18n-en" lang="en">Advanced Excel</span></span
+                >
                 <span class="tag">SPSS</span>
                 <span class="tag">scikit-learn</span>
-                <span class="tag">Logit / 离散选择</span>
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">Logit / 离散选择</span
+                  ><span class="i18n-en" lang="en">Logit / discrete choice</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">数据建模与商业解读</span
@@ -4562,12 +4707,21 @@
               </h3>
               <div class="tag-cloud">
                 <span class="tag tag--focus">Tableau</span>
-                <span class="tag tag--focus">看板 / Dashboard</span>
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">看板 / Dashboard</span
+                  ><span class="i18n-en" lang="en">Dashboards</span></span
+                >
                 <span class="tag">PowerPoint</span>
                 <span class="tag">Figma / Canva</span>
                 <span class="tag">Jupyter</span>
-                <span class="tag">向业务翻译结论</span>
-                <span class="tag">汇报叙事</span>
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">向业务翻译结论</span
+                  ><span class="i18n-en" lang="en">Stakeholder-ready takeaways</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">汇报叙事</span
+                  ><span class="i18n-en" lang="en">Exec narrative</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">从数据到可执行建议</span
@@ -4583,13 +4737,31 @@
                 >
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">活动全流程</span>
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">活动全流程</span
+                  ><span class="i18n-en" lang="en">End-to-end programs</span></span
+                >
                 <span class="tag tag--focus">SOP</span>
-                <span class="tag">用户增长</span>
-                <span class="tag">漏斗分析</span>
-                <span class="tag">跨部门协同</span>
-                <span class="tag">KPI 拆解</span>
-                <span class="tag">A/B 测试</span>
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">用户增长</span
+                  ><span class="i18n-en" lang="en">User growth</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">漏斗分析</span
+                  ><span class="i18n-en" lang="en">Funnel analysis</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">跨部门协同</span
+                  ><span class="i18n-en" lang="en">Cross-functional</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">KPI 拆解</span
+                  ><span class="i18n-en" lang="en">KPI decomposition</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">A/B 测试</span
+                  ><span class="i18n-en" lang="en">A/B testing</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">0→1 落地与规模化运营</span><span class="i18n-en" lang="en">Ship 0→1, then scale</span>
@@ -4604,11 +4776,26 @@
                 >
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">社媒运营</span>
-                <span class="tag tag--focus">内容商业化</span>
-                <span class="tag">短视频 / 剪辑</span>
-                <span class="tag">文案与脚本</span>
-                <span class="tag">A/B 内容实验</span>
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">社媒运营</span
+                  ><span class="i18n-en" lang="en">Social media</span></span
+                >
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">内容商业化</span
+                  ><span class="i18n-en" lang="en">Monetization</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">短视频 / 剪辑</span
+                  ><span class="i18n-en" lang="en">Short video / edit</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">文案与脚本</span
+                  ><span class="i18n-en" lang="en">Copy &amp; scripts</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">A/B 内容实验</span
+                  ><span class="i18n-en" lang="en">A/B content tests</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">从创意到可量化结果；持续数据复盘</span
@@ -4622,13 +4809,34 @@
                 <span><span class="i18n-zh">AI 与效率</span><span class="i18n-en" lang="en">AI &amp; productivity</span></span>
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">大模型提示词</span>
-                <span class="tag tag--focus">工作流设计</span>
-                <span class="tag">文献/资料摘要</span>
-                <span class="tag">邮件与文案草稿</span>
-                <span class="tag">自动化脚本</span>
-                <span class="tag">实验心态</span>
-                <span class="tag">隐私与合规意识</span>
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">大模型提示词</span
+                  ><span class="i18n-en" lang="en">LLM prompting</span></span
+                >
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">工作流设计</span
+                  ><span class="i18n-en" lang="en">Workflow design</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">文献/资料摘要</span
+                  ><span class="i18n-en" lang="en">Doc summarization</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">邮件与文案草稿</span
+                  ><span class="i18n-en" lang="en">Email &amp; copy drafts</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">自动化脚本</span
+                  ><span class="i18n-en" lang="en">Automation scripts</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">实验心态</span
+                  ><span class="i18n-en" lang="en">Experimental mindset</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">隐私与合规意识</span
+                  ><span class="i18n-en" lang="en">Privacy &amp; compliance</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">把 AI 落到真实工作流</span
@@ -4644,14 +4852,35 @@
                 >
               </h3>
               <div class="tag-cloud">
-                <span class="tag tag--focus">英语工作语言</span>
-                <span class="tag tag--focus">跨时区沟通</span>
-                <span class="tag">中文母语</span>
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">英语工作语言</span
+                  ><span class="i18n-en" lang="en">English at work</span></span
+                >
+                <span class="tag tag--focus"
+                  ><span class="i18n-zh" lang="zh-CN">跨时区沟通</span
+                  ><span class="i18n-en" lang="en">Cross-time-zone async</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">中文母语</span
+                  ><span class="i18n-en" lang="en">Native Chinese</span></span
+                >
                 <span class="tag">IELTS 7.0 (7.5 S)</span>
-                <span class="tag">会议纪要</span>
-                <span class="tag">利益相关方管理</span>
-                <span class="tag">公开表达 / 主持</span>
-                <span class="tag">Notion / 飞书类协作</span>
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">会议纪要</span
+                  ><span class="i18n-en" lang="en">Meeting notes</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">利益相关方管理</span
+                  ><span class="i18n-en" lang="en">Stakeholders</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">公开表达 / 主持</span
+                  ><span class="i18n-en" lang="en">Public speaking / hosting</span></span
+                >
+                <span class="tag"
+                  ><span class="i18n-zh" lang="zh-CN">Notion / 飞书类协作</span
+                  ><span class="i18n-en" lang="en">Notion / Lark-style tools</span></span
+                >
               </div>
               <div class="meter">
                 <span class="i18n-zh">英文学术与职场沟通</span
@@ -5297,9 +5526,23 @@
           }
         })();
 
+        function syncI18nDom(loc) {
+          var useEn = loc === "en";
+          document.querySelectorAll(".i18n-zh").forEach(function (el) {
+            if (useEn) el.setAttribute("hidden", "");
+            else el.removeAttribute("hidden");
+          });
+          document.querySelectorAll(".i18n-en").forEach(function (el) {
+            if (useEn) el.removeAttribute("hidden");
+            else el.setAttribute("hidden", "");
+          });
+        }
+
         function applyLocale(loc) {
+          document.documentElement.setAttribute("data-locale", loc);
           document.body.setAttribute("data-locale", loc);
           document.documentElement.setAttribute("lang", loc === "en" ? "en" : "zh-CN");
+          syncI18nDom(loc);
           document.title = loc === "en" ? "April Zhao | Portfolio & open studio" : "赵梓淇 | 个人站与交流入口";
           try {
             localStorage.setItem(LOCALE_KEY, loc);
